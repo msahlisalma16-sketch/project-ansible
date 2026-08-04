@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<enterpriseConfig version="1">
+
+    <!-- Databases grouped by modules -->
+    <Modules>
+        <HR>
+            <Database name="hrMain" user="hrUser" password="hrPass2026" dsn="jdbc:oracle:thin:@hrdb.newco.net:1521/HR"/>
+        </HR>
+        <Finance>
+            <Database name="finMain" user="finUser" password="finPass2026" dsn="jdbc:oracle:thin:@findb.newco.net:1521/FIN"/>
+        </Finance>
+    </Modules>
+
+    <!-- Messaging with endpoints -->
+    <MessagingSystem>
+        <Server name="msgSrv01" host="mq01.newco.net" port="61616"/>
+        <Credentials>
+            <admin user="msgAdmin" password="msgAdmin2026"/>
+        </Credentials>
+        <Channels>
+            <queue name="HRQueue"/>
+            <queue name="FinanceQueue"/>
+            <topic name="AuditTopic"/>
+        </Channels>
+    </MessagingSystem>
+
+    <!-- Logging -->
+    <Logger>
+        <Config level="INFO" format="%d %p %c - %m%n"/>
+        <File path="/var/log/hrfin/app.log"/>
+        <Archive path="/var/log/hrfin/archive"/>
+    </Logger>
+
+    <!-- Resources -->
+    <ResourceSet>
+        <Dir type="base">/srv/hrfin/resources</Dir>
+        <Dir type="scripts">/srv/hrfin/resources/scripts</Dir>
+        <Dir type="reports">/srv/hrfin/resources/reports</Dir>
+    </ResourceSet>
+
+    <!-- API -->
+    <ServiceGateway>
+        <endpoint url="https://api.hrfin.newco.net/v5"/>
+        <auth token="Bearer hrfinToken2026"/>
+        <timeout>15000</timeout>
+    </ServiceGateway>
+
+    <!-- Storage -->
+    <StorageSystem>
+        <local>/mnt/hrfin/storage</local>
+        <ftp host="ftp.hrfin.newco.net" port="2026" user="ftpHrFin" password="ftpHrFin2026"/>
+    </StorageSystem>
+
+</enterpriseConfig>

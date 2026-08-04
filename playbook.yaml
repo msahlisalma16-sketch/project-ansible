@@ -1,0 +1,155 @@
+- name: Prepare local directories
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}"
+    files_dir: "{{ project_dir }}/files"
+    templates_dir: "{{ project_dir }}/templates"
+    final_dir: "{{ project_dir }}/final"
+    debug_dir: "{{ project_dir }}/debug"
+  tasks:
+    - name: Ensure local directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ files_dir }}"
+        - "{{ templates_dir }}"
+        - "{{ final_dir }}"
+        - "{{ debug_dir }}"
+
+- name: Fetch v5.xml from Windows
+  hosts: windows
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}"
+    remote_v5_path: "C:\\Users\\vboxuser\\Desktop\\project\\v5.xml"
+    local_v5_path: "{{ project_dir }}/files/v5.xml"
+  tasks:
+    - name: Fetch v5.xml from Windows target
+      ansible.builtin.fetch:
+        src: "{{ remote_v5_path }}"
+        dest: "{{ local_v5_path }}"
+        flat: true
+
+- name: Run migration locally
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}"
+    v1_xml_path: "{{ project_dir }}/files/v1.xml"
+    v5_xml_path: "{{ project_dir }}/files/v5.xml"
+    output_template_path: "{{ project_dir }}/templates/config.xml.j2"
+    output_vars_path: "{{ project_dir }}/vars.yaml"
+    output_report_path: "{{ project_dir }}/mapping_report.txt"
+    # IMPORTANT: point to your venv Python
+    python_executable: "{{ lookup('env','HOME') }}/venvs/migration/bin/python3"
+  tasks:
+    - name: Run XML migration script
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/utils/xml_migration.py"
+          - "{{ v1_xml_path }}"
+          - "{{ v5_xml_path }}"
+          - --out-template
+          - "{{ output_template_path }}"
+          - --out-vars
+          - "{{ output_vars_path }}"
+          - --out-report
+          - "{{ output_report_path }}"
+      args:
+        chdir: "{{ project_dir }}"
+      changed_when: false
+
+- name: Render final filled XML
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}"
+    rendered_template_path: "{{ project_dir }}/templates/config.xml.j2"
+    output_xml_path: "{{ project_dir }}/final/final_config.xml"
+  tasks:
+    - name: Load generated variables
+      ansible.builtin.include_vars:
+        file: "{{ project_dir }}/vars.yaml"
+
+    - name: Generate final_config.xml locally
+      ansible.builtin.template:
+        src: "{{ rendered_template_path }}"
+        dest: "{{ output_xml_path }}"
+
+- name: Copy final_config.xml to Windows
+  hosts: windows
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}"
+    windows_output_path: "C:\\Users\\vboxuser\\Desktop\\project\\final_config.xml"
+  tasks:
+    - name: Send final_config.xml to Windows target
+      ansible.windows.win_copy:
+        src: "{{ project_dir }}/final/final_config.xml"
+        dest: "{{ windows_output_path }}"
+
+- name: Run tests and debug scripts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}"
+    debug_dir: "{{ project_dir }}/debug"
+    python_executable: "{{ lookup('env','HOME') }}/venvs/migration/bin/python3"
+  tasks:
+    - name: Run score_probe.py
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/tests/score_probe.py"
+      register: score_probe_out
+      ignore_errors: true
+
+    - name: Save score_probe output
+      ansible.builtin.copy:
+        content: "{{ score_probe_out.stdout }}\n{{ score_probe_out.stderr }}"
+        dest: "{{ debug_dir }}/score_probe.log"
+
+    - name: Run test_xml_migration.py
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - -m
+          - unittest
+          - "{{ project_dir }}/tests/test_xml_migration.py"
+      register: test_xml_out
+      ignore_errors: true
+
+    - name: Save test_xml_migration output
+      ansible.builtin.copy:
+        content: "{{ test_xml_out.stdout }}\n{{ test_xml_out.stderr }}"
+        dest: "{{ debug_dir }}/test_xml_migration.log"
+
+    - name: Run debug_match.py
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/utils/debug_match.py"
+      register: debug_match_out
+      ignore_errors: true
+
+    - name: Save debug_match output
+      ansible.builtin.copy:
+        content: "{{ debug_match_out.stdout }}\n{{ debug_match_out.stderr }}"
+        dest: "{{ debug_dir }}/debug_match.log"
+
+    - name: Run debug_parser.py
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/utils/debug_parser.py"
+      register: debug_parser_out
+      ignore_errors: true
+
+    - name: Save debug_parser output
+      ansible.builtin.copy:
+        content: "{{ debug_parser_out.stdout }}\n{{ debug_parser_out.stderr }}"
+        dest: "{{ debug_dir }}/debug_parser.log"
+

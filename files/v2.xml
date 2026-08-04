@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="style.xsl"?>
+<!-- Universal XML stress test -->
+
+<!DOCTYPE enterpriseConfiguration [
+  <!ENTITY company "TestCorp">
+]>
+
+<enterpriseConfiguration xmlns:ns="http://example.com/schema">
+  <!-- Attributes -->
+  <component name="Modules">
+    <parameters>
+      <Database name="hrMain" user="hrUser" password="hrPass" dsn="jdbc:oracle:thin:@hrdb.test.net:1521/HR"/>
+      <Database name="finMain" user="finUser" password="finPass" dsn="jdbc:oracle:thin:@findb.test.net:1521/FIN"/>
+    </parameters>
+  </component>
+
+  <!-- Nested tags -->
+  <component name="MessagingSystem">
+    <parameters>
+      <serverHost>msg.test.net</serverHost>
+      <serverPort>61616</serverPort>
+      <adminUser>adminTest</adminUser>
+      <adminPassword>adminPassTest</adminPassword>
+      <queues>
+        <queue name="HRQueue">HRQueueTest</queue>
+        <queue name="FinanceQueue">FinanceQueueTest</queue>
+      </queues>
+      <topics>
+        <topic name="AuditTopic">AuditTopicTest</topic>
+      </topics>
+    </parameters>
+  </component>
+
+  <!-- CDATA + entity -->
+  <component name="Logger">
+    <parameters>
+      <logLevel><![CDATA[INFO & DEBUG]]></logLevel>
+      <logFormat>%d %c %m%n</logFormat>
+      <logFile>/var/log/test/app.log</logFile>
+      <logArchive>/var/log/test/archive</logArchive>
+      <companyName>&company;</companyName>
+    </parameters>
+  </component>
+
+  <!-- Self-closing + optional -->
+  <component name="ResourceSet">
+    <parameters>
+      <baseDir>/srv/test</baseDir>
+      <scriptsDir>/srv/test/resources/scripts</scriptsDir>
+      <reportsDir>/srv/test/resources/reports</reportsDir>
+      <optionalDir/>
+    </parameters>
+  </component>
+
+  <!-- Namespaces + attributes -->
+  <ns:component name="ServiceGateway">
+    <ns:parameters>
+      <ns:endpointUrl protocol="https">https://api.test.net/v5</ns:endpointUrl>
+      <ns:authToken>testToken123</ns:authToken>
+      <ns:timeout unit="ms">15000</ns:timeout>
+    </ns:parameters>
+  </ns:component>
+
+  <!-- Multiple storage backends -->
+  <component name="StorageSystem">
+    <parameters>
+      <localPath>/srv/test/storage</localPath>
+      <ftp>
+        <host>ftp.test.net</host>
+        <port>2121</port>
+        <user>ftpTest</user>
+        <password>ftpPassTest</password>
+      </ftp>
+      <s3>
+        <bucket>test-bucket</bucket>
+        <region>us-east-1</region>
+        <accessKey>AKIA_TEST</accessKey>
+        <secretKey>SECRET_TEST</secretKey>
+      </s3>
+    </parameters>
+  </component>
+
+  <!-- Mixed content -->
+  <component name="Notes">
+    <parameters>
+      <note>Remember to <bold>encrypt</bold> passwords</note>
+    </parameters>
+  </component>
+
+  <!-- Unknown component -->
+  <component name="Analytics">
+    <parameters>
+      <enabled>true</enabled>
+      <engine>spark</engine>
+      <nodes>
+        <node id="1">analytics01.test.net</node>
+        <node id="2">analytics02.test.net</node>
+      </nodes>
+    </parameters>
+  </component>
+</enterpriseConfiguration>

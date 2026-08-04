@@ -1,0 +1,8 @@
+Debug parser results:
+v1.xml parsed with 64 elements
+v5.xml contains 28 placeholders
+ - modules.hr.username
+ - modules.hr.password
+ - modules.hr.dsn
+ - modules.finance.username
+ - modules.finance.password
