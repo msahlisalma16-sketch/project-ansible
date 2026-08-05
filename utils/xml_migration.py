@@ -6,8 +6,13 @@ try:
 except ImportError:
     yaml = None
 
-from sentence_transformers import SentenceTransformer, util
-model = SentenceTransformer('all-MiniLM-L6-v2')
+try:
+    from sentence_transformers import SentenceTransformer, util
+except ImportError:
+    SentenceTransformer = None
+    util = None
+
+_ai_model = None
 
 # --- Helpers ---
 def strip_namespace(tag):
@@ -37,12 +42,28 @@ def tokenize_term(value: str):
     return [tok for tok in re.split(r"[^a-z0-9]+", s) if tok]
 
 # --- AI similarity ---
+def get_ai_model():
+    global _ai_model
+    if SentenceTransformer is None or util is None:
+        return None
+    if _ai_model is None:
+        _ai_model = SentenceTransformer('all-MiniLM-L6-v2')
+    return _ai_model
+
+
 def ai_similarity(a, b):
     if not a or not b:
+        return 0.0
+    model = get_ai_model()
+    if model is None:
         return 0.0
     emb_a = model.encode(a, convert_to_tensor=True)
     emb_b = model.encode(b, convert_to_tensor=True)
     return float(util.cos_sim(emb_a, emb_b))
+
+
+def ai_enabled():
+    return SentenceTransformer is not None and util is not None
 
 # --- Scoring ---
 def score_candidate(ph, v):
@@ -84,10 +105,6 @@ def score_candidate(ph, v):
     if leaf and (leaf == v_attr or leaf == v_tag or leaf in v_path):
         score += 70
         reason_parts.append("Leaf match.")
-
-    sim = ai_similarity(ph["placeholder"], v.get("text", ""))
-    score += sim * 100
-    reason_parts.append(f"Similarity {sim:.2f}")
 
     if not reason_parts:
         reason_parts.append("No strong matches.")
@@ -231,8 +248,38 @@ def write_vars_yaml(mapping, yaml_path):
 def write_report(report_lines, report_path):
     with open(report_path, "w", encoding="utf-8") as f:
         f.write("REPORT LEGEND:\n")
-        f.write("- Exact match, token overlap, component/tag/leaf match, similarity scores.\n\n")
+        f.write("- Exact match, token overlap, component/tag/leaf match.\n\n")
         for line in report_lines:
+            f.write(line + "\n")
+
+
+def generate_ai_review(placeholders, v1_values, top_n=3):
+    lines = []
+    if not ai_enabled():
+        lines.append("AI review unavailable: sentence_transformers is not installed.")
+        return lines
+
+    for ph in placeholders:
+        candidates = []
+        for v in v1_values:
+            sim = ai_similarity(ph["placeholder"], v.get("text", ""))
+            candidates.append((sim, v))
+        candidates.sort(key=lambda item: item[0], reverse=True)
+
+        lines.append(f"Placeholder: {ph['placeholder']} ({ph['location']})")
+        for sim, v in candidates[:top_n]:
+            lines.append(
+                f"  candidate: {v.get('path')} => {v.get('text')} (similarity={sim:.3f})"
+            )
+        lines.append("")
+    return lines
+
+
+def write_ai_review(review_lines, review_path):
+    with open(review_path, "w", encoding="utf-8") as f:
+        f.write("AI Review Suggestions:\n")
+        f.write("- These suggestions do not affect vars or final output.\n\n")
+        for line in review_lines:
             f.write(line + "\n")
 
 # --- Main ---
@@ -244,6 +291,8 @@ def main():
     parser.add_argument("--out-template", default="templates/config_target.j2")
     parser.add_argument("--out-vars", default="/home/vboxuser/ansible-project/vars.yaml")
     parser.add_argument("--out-report", default="mapping_report.txt")
+    parser.add_argument("--ai-review", default="mapping_ai_review.txt",
+                        help="Write a separate AI review report for candidate suggestions.")
     args = parser.parse_args()
 
     # Debug line to confirm where vars.yaml will be written
@@ -258,5 +307,12 @@ def main():
     write_vars_yaml(mapping, args.out_vars)
     write_report(report_lines, args.out_report)
 
-    print(f"Generated {args.out_template}, {args.out_vars}, {args.out_report}")
+    review_lines = generate_ai_review(placeholders, v1_values)
+    write_ai_review(review_lines, args.ai_review)
+
+    print(f"Generated {args.out_template}, {args.out_vars}, {args.out_report}, {args.ai_review}")
+
+
+if __name__ == "__main__":
+    main()
 

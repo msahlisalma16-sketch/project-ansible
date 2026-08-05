@@ -60,19 +60,38 @@
           - "{{ output_report_path }}"
       args:
         chdir: "{{ project_dir }}"
+      register: migration_out
       changed_when: false
+
+    - name: Show migration output
+      ansible.builtin.debug:
+        msg: |
+          rc={{ migration_out.rc }}
+          stdout={{ migration_out.stdout }}
+          stderr={{ migration_out.stderr }}
+
+    - name: Check generated vars.yaml exists
+      ansible.builtin.stat:
+        path: "{{ output_vars_path }}"
+      register: vars_yaml_stat
+
+    - name: Fail if vars.yaml was not generated
+      ansible.builtin.fail:
+        msg: "Migration did not create vars.yaml at {{ output_vars_path }}"
+      when: not vars_yaml_stat.stat.exists
 
 - name: Render final filled XML
   hosts: localhost
   gather_facts: false
   vars:
     project_dir: "{{ playbook_dir }}"
+    output_vars_path: "{{ project_dir }}/vars.yaml"
     rendered_template_path: "{{ project_dir }}/templates/config.xml.j2"
     output_xml_path: "{{ project_dir }}/final/final_config.xml"
   tasks:
     - name: Load generated variables
       ansible.builtin.include_vars:
-        file: "{{ project_dir }}/vars.yaml"
+        file: "{{ output_vars_path }}"
 
     - name: Generate final_config.xml locally
       ansible.builtin.template:
