@@ -99,6 +99,9 @@ def score_candidate(ph, v):
     if comp and comp == v_comp:
         score += 80
         reason_parts.append("Component match.")
+    if comp and comp in v_path:
+        score += 80
+        reason_parts.append("Component path match.")
     if tag and tag == v_tag:
         score += 75
         reason_parts.append("Tag match.")

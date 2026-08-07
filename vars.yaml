@@ -1,0 +1,45 @@
+modules:
+  hr:
+    username: hrUser
+    password: hrPass2026
+    dsn: jdbc:oracle:thin:@hrdb.newco.net:1521/HR
+  finance:
+    username: finUser
+    password: finPass2026
+    dsn: jdbc:oracle:thin:@findb.newco.net:1521/FIN
+messaging:
+  server:
+    host: mq01.newco.net
+    port: '61616'
+  admin:
+    user: msgAdmin
+    password: msgAdmin2026
+  queue:
+    hr: HRQueue
+    finance: FinanceQueue
+  topic:
+    audit: AuditTopic
+logging:
+  level: INFO
+  format: '%d %p %c - %m%n'
+  file:
+    path: /var/log/hrfin/archive
+  archive:
+    path: /var/log/hrfin/archive
+resources:
+  dir:
+    base: base
+    scripts: /srv/hrfin/resources/scripts
+    reports: /srv/hrfin/resources/reports
+api:
+  gateway:
+    url: https://api.hrfin.newco.net/v5
+    token: Bearer hrfinToken2026
+    timeout: '15000'
+storage:
+  local: /mnt/hrfin/storage
+  ftp:
+    host: ftp.hrfin.newco.net
+    port: '2026'
+    user: ftpHrFin
+    password: ftpHrFin2026
