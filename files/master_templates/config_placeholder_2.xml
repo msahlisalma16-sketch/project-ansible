@@ -1,0 +1,31 @@
+<application>
+    <scripts>
+        <![CDATA[
+            // Database connection script
+            var dbUrl = "#{database.connection.url}";
+            var dbUser = "#{database.connection.user}";
+            var dbPass = "#{database.connection.password}";
+            connect(dbUrl, dbUser, dbPass);
+
+            // Analytics connection
+            var analyticsUrl = "#{database.analytics.url}";
+            var analyticsUser = "#{database.analytics.user}";
+            var analyticsPass = "#{database.analytics.password}";
+            connect(analyticsUrl, analyticsUser, analyticsPass);
+        ]]>
+    </scripts>
+
+    <messages>
+        <![CDATA[
+            PrimaryServer=#{messaging.server.host}:#{messaging.server.port}
+            BackupServer=#{messaging.server.backup.host}:#{messaging.server.backup.port}
+        ]]>
+    </messages>
+
+    <auth>
+        <![CDATA[
+            Token=#{modules.auth.token}
+            Expiry=3600
+        ]]>
+    </auth>
+</application>

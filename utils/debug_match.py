@@ -1,10 +1,11 @@
 import sys
 sys.path.append('./utils')
 import xml_migration as m
+import config
 
 def main():
-    v1_path = 'files/v2.xml'
-    v5_path = 'files/v5.xml'
+    v1_path = config.V1_PATH
+    v5_path = config.V5_PATH
 
     try:
         placeholders, _ = m.extract_placeholders(v5_path)

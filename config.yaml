@@ -1,0 +1,20 @@
+# Centralized Configuration for XML Migration Tools
+# Master template source (1 shared XML template with #{...} placeholders)
+master_template_path: files/master_templates/master_config.xml
+out_template: templates/config_target.j2
+
+# Multiple clients definition (each client gets its own vars and final config)
+clients:
+  - name: client1
+    source_xml: files/client_sources/client1_source.xml
+    out_vars: vars/vars_client1.yaml
+    out_final: final/client1_config.xml
+    out_report: reports/mappings/mapping_report_client1.txt
+    ai_review: reports/ai_reviews/mapping_ai_review_client1.txt
+
+  - name: client2
+    source_xml: files/client_sources/client2_source.xml
+    out_vars: vars/vars_client2.yaml
+    out_final: final/client2_config.xml
+    out_report: reports/mappings/mapping_report_client2.txt
+    ai_review: reports/ai_reviews/mapping_ai_review_client2.txt

@@ -1,0 +1,54 @@
+
+<system>
+    <environment name="production">
+        <messaging>
+            <server>
+                <host>#{messaging.server.host}</host>
+                <port>#{messaging.server.port}</port>
+                <protocol>tcp</protocol>
+            </server>
+            <queue>
+                <name>prodQueue</name>
+                <retry>3</retry>
+            </queue>
+        </messaging>
+        <database>
+            <connection>
+                <url>#{database.connection.url}</url>
+                <user>#{database.connection.user}</user>
+                <password>#{database.connection.password}</password>
+            </connection>
+            <pool>
+                <size>20</size>
+                <timeout>30</timeout>
+            </pool>
+        </database>
+        <modules>
+            <auth>
+                <token>#{modules.auth.token}</token>
+                <expiry>3600</expiry>
+            </auth>
+            <reporting>
+                <endpoint>#{modules.reporting.endpoint}</endpoint>
+                <format>xml</format>
+            </reporting>
+        </modules>
+    </environment>
+
+    <environment name="staging">
+        <messaging>
+            <server>
+                <host>#{messaging.server.staging.host}</host>
+                <port>#{messaging.server.staging.port}</port>
+                <protocol>tcp</protocol>
+            </server>
+        </messaging>
+        <database>
+            <connection>
+                <url>#{database.staging.url}</url>
+                <user>#{database.staging.user}</user>
+                <password>#{database.staging.password}</password>
+            </connection>
+        </database>
+    </environment>
+</system>

@@ -1,0 +1,132 @@
+<system>
+    <environment name="production">
+        <messaging>
+            <server>
+                <host>prod-msg01.example.com</host>
+                <port>5672</port>
+                <protocol>tcp</protocol>
+            </server>
+            <server>
+                <host>prod-msg02-backup.example.com</host>
+                <port>5673</port>
+                <protocol>tcp</protocol>
+            </server>
+            <queue>
+                <name>prodQueue</name>
+                <retry>5</retry>
+                <timeout>120</timeout>
+            </queue>
+        </messaging>
+
+        <database>
+            <connection>
+                <url>jdbc:mysql://db-prod01.example.com:3306/maindb</url>
+                <user>admin</user>
+                <password>SuperSecurePass123</password>
+            </connection>
+            <pool>
+                <size>50</size>
+                <timeout>60</timeout>
+            </pool>
+        </database>
+
+        <modules>
+            <auth>
+                <token>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.prodTokenValue</token>
+                <expiry>7200</expiry>
+            </auth>
+            <reporting>
+                <endpoint>https://reports.example.com/api/v1</endpoint>
+                <format>json</format>
+                <schedule>hourly</schedule>
+            </reporting>
+            <analytics>
+                <endpoint>https://analytics.example.com/collect</endpoint>
+                <refresh>daily</refresh>
+                <enabled>true</enabled>
+            </analytics>
+        </modules>
+    </environment>
+
+    <environment name="staging">
+        <messaging>
+            <server>
+                <host>staging-msg01.example.com</host>
+                <port>5674</port>
+                <protocol>tcp</protocol>
+            </server>
+        </messaging>
+
+        <database>
+            <connection>
+                <url>jdbc:postgresql://db-staging.example.com:5432/stagingdb</url>
+                <user>staging_user</user>
+                <password>StagingPass456</password>
+            </connection>
+            <pool>
+                <size>20</size>
+                <timeout>45</timeout>
+            </pool>
+        </database>
+
+        <modules>
+            <auth>
+                <token>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.stagingTokenValue</token>
+                <expiry>3600</expiry>
+            </auth>
+            <reporting>
+                <endpoint>https://staging-reports.example.com/api/v1</endpoint>
+                <format>xml</format>
+                <schedule>daily</schedule>
+            </reporting>
+        </modules>
+    </environment>
+
+    <catalog>
+        <service id="1">
+            <name>Messaging Service</name>
+            <endpoint>prod-msg01.example.com:5672</endpoint>
+            <protocol>tcp</protocol>
+        </service>
+        <service id="2">
+            <name>Backup Messaging Service</name>
+            <endpoint>prod-msg02-backup.example.com:5673</endpoint>
+            <protocol>tcp</protocol>
+        </service>
+        <service id="3">
+            <name>Main Database</name>
+            <endpoint>jdbc:mysql://db-prod01.example.com:3306/maindb</endpoint>
+            <credentials>
+                <user>admin</user>
+                <password>SuperSecurePass123</password>
+            </credentials>
+        </service>
+        <service id="4">
+            <name>Analytics Database</name>
+            <endpoint>jdbc:postgresql://analytics-db.example.com:5432/analytics</endpoint>
+            <credentials>
+                <user>analytics_user</user>
+                <password>AnalyticsPass789</password>
+            </credentials>
+        </service>
+        <service id="5">
+            <name>Authentication Module</name>
+            <token>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.authModuleToken</token>
+        </service>
+        <service id="6">
+            <name>Reporting Module</name>
+            <endpoint>https://reports.example.com/api/v1</endpoint>
+            <format>json</format>
+        </service>
+        <service id="7">
+            <name>Analytics Module</name>
+            <endpoint>https://analytics.example.com/collect</endpoint>
+            <refresh>daily</refresh>
+        </service>
+        <service id="8">
+            <name>Monitoring Module</name>
+            <endpoint>https://monitoring.example.com/api/v1</endpoint>
+            <interval>5m</interval>
+        </service>
+    </catalog>
+</system>

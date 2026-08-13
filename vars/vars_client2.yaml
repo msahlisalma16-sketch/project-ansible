@@ -1,0 +1,39 @@
+modules:
+  hr:
+    username: hrUser
+    password: hrPass
+    dsn: jdbc:oracle:thin:@hrdb.test.net:1521/HR
+  finance:
+    username: hrUser
+    password: hrPass
+    dsn: jdbc:oracle:thin:@hrdb.test.net:1521/HR
+messaging:
+  server:
+    host: msg.test.net
+    port: '61616'
+  admin:
+    user: adminTest
+    password: adminPassTest
+logging:
+  level: INFO & DEBUG
+  format: '%d %c %m%n'
+  file:
+    path: /var/log/test/app.log
+  archive:
+    path: /var/log/test/archive
+resources:
+  dir:
+    base: /srv/test
+    scripts: /srv/test/resources/scripts
+    reports: /srv/test/resources/reports
+api:
+  gateway:
+    url: https://api.test.net/v5
+    token: testToken123
+    timeout: ms
+storage:
+  local: /srv/test/storage
+  ftp:
+    host: ftp.test.net
+    user: hrUser
+    password: ftpPassTest

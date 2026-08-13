@@ -1,0 +1,63 @@
+<enterpriseConfiguration>
+
+    <!-- Databases -->
+    <component name="Modules">
+        <parameters>
+            <Database name="hrMain" user="hrUser" password="hrPass" dsn="jdbc:oracle:thin:@hrdb.test.net:1521/HR"/>
+            <Database name="finMain" user="hrUser" password="hrPass" dsn="jdbc:oracle:thin:@hrdb.test.net:1521/HR"/>
+        </parameters>
+    </component>
+
+    <!-- Messaging -->
+    <component name="MessagingSystem">
+        <parameters>
+            <serverHost>msg.test.net</serverHost>
+            <serverPort>61616</serverPort>
+            <adminUser>adminTest</adminUser>
+            <adminPassword>adminPassTest</adminPassword>
+            <hrQueue>{{ messaging.queue.hr }}</hrQueue>
+            <financeQueue>{{ messaging.queue.finance }}</financeQueue>
+            <auditTopic>{{ messaging.topic.audit }}</auditTopic>
+        </parameters>
+    </component>
+
+    <!-- Logging -->
+    <component name="Logger">
+        <parameters>
+            <logLevel>INFO & DEBUG</logLevel>
+            <logFormat>%d %c %m%n</logFormat>
+            <logFile>/var/log/test/app.log</logFile>
+            <logArchive>/var/log/test/archive</logArchive>
+        </parameters>
+    </component>
+
+    <!-- Resources -->
+    <component name="ResourceSet">
+        <parameters>
+            <baseDir>/srv/test</baseDir>
+            <scriptsDir>/srv/test/resources/scripts</scriptsDir>
+            <reportsDir>/srv/test/resources/reports</reportsDir>
+        </parameters>
+    </component>
+
+    <!-- API -->
+    <component name="ServiceGateway">
+        <parameters>
+            <endpointUrl>https://api.test.net/v5</endpointUrl>
+            <authToken>testToken123</authToken>
+            <timeout>ms</timeout>
+        </parameters>
+    </component>
+
+    <!-- Storage -->
+    <component name="StorageSystem">
+        <parameters>
+            <localPath>/srv/test/storage</localPath>
+            <ftpHost>ftp.test.net</ftpHost>
+            <ftpPort>{{ storage.ftp.port }}</ftpPort>
+            <ftpUser>hrUser</ftpUser>
+            <ftpPassword>ftpPassTest</ftpPassword>
+        </parameters>
+    </component>
+
+</enterpriseConfiguration>

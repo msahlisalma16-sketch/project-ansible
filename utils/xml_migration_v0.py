@@ -489,13 +489,17 @@ def write_report(report_lines, report_path):
 
 def main():
     import argparse
+    try:
+        import config
+    except ImportError:
+        from utils import config
 
     parser = argparse.ArgumentParser(description="Migrate v5 XML placeholders to Jinja2 and vars YAML.")
-    parser.add_argument("v1_path", nargs="?", default="v1.xml", help="Path to the source v1 XML file")
-    parser.add_argument("v5_path", nargs="?", default="v5.xml", help="Path to the target v5 XML file")
-    parser.add_argument("--out-template", default="templates/config_target.j2", help="Output Jinja2 template path")
-    parser.add_argument("--out-vars", default="vars.yaml", help="Output YAML vars path")
-    parser.add_argument("--out-report", default="mapping_report.txt", help="Output mapping report path")
+    parser.add_argument("v1_path", nargs="?", default=str(config.V1_PATH), help="Path to the source v1 XML file")
+    parser.add_argument("v5_path", nargs="?", default=str(config.V5_PATH), help="Path to the target v5 XML file")
+    parser.add_argument("--out-template", default=str(config.OUT_TEMPLATE), help="Output Jinja2 template path")
+    parser.add_argument("--out-vars", default=str(config.OUT_VARS), help="Output YAML vars path")
+    parser.add_argument("--out-report", default=str(config.OUT_REPORT), help="Output mapping report path")
     args = parser.parse_args()
 
     placeholders, v5_tree = extract_placeholders(args.v5_path)

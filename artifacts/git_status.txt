@@ -1,0 +1,11 @@
+## master
+ M Jenkinsfile
+ M tests/test_xml_migration.py
+ M utils/__pycache__/xml_migration.cpython-313.pyc
+ M utils/xml_migration.py
+?? .vscode/
+?? git_status.txt
+?? requirements.txt
+?? tests/__pycache__/test_xml_migration.cpython-313.pyc
+origin	https://github.com/msahlisalma16-sketch/project-ansible.git (fetch)
+origin	https://github.com/msahlisalma16-sketch/project-ansible.git (push)
