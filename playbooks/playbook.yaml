@@ -8,7 +8,7 @@
     final_dir: "{{ project_dir }}/final"
     debug_dir: "{{ project_dir }}/debug"
   tasks:
-    - name: Ensure local directories exist
+    - name: "Ensure local directories exist"
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
@@ -23,13 +23,13 @@
   gather_facts: false
   vars:
     project_dir: "{{ playbook_dir }}"
-    remote_v5_path: "C:\\Users\\vboxuser\\Desktop\\project\\master_config.xml"
-    local_v5_path: "{{ project_dir }}/files/master_templates/master_config.xml"
+    remote_master_path: "C:\\Users\\vboxuser\\Desktop\\project\\master_config.xml"
+    local_master_path: "{{ project_dir }}/files/master_templates/master_config.xml"
   tasks:
-    - name: Fetch master_config.xml from Windows target
+    - name: "Fetch master_config.xml from Windows target"
       ansible.builtin.fetch:
-        src: "{{ remote_v5_path }}"
-        dest: "{{ local_v5_path }}"
+        src: "{{ remote_master_path }}"
+        dest: "{{ local_master_path }}"
         flat: true
 
 - name: Run migration locally
@@ -44,7 +44,7 @@
     output_report_path: "{{ project_dir }}/reports/mappings/mapping_report_client1.txt"
     python_executable: "{{ lookup('env','HOME') }}/venvs/migration/bin/python3"
   tasks:
-    - name: Run XML migration script
+    - name: "Run XML migration script"
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
@@ -62,19 +62,19 @@
       register: migration_out
       changed_when: false
 
-    - name: Show migration output
+    - name: "Show migration output"
       ansible.builtin.debug:
         msg: |
           rc={{ migration_out.rc }}
           stdout={{ migration_out.stdout }}
           stderr={{ migration_out.stderr }}
 
-    - name: Check generated vars file exists
+    - name: "Check generated vars file exists"
       ansible.builtin.stat:
         path: "{{ output_vars_path }}"
       register: vars_yaml_stat
 
-    - name: Fail if vars file was not generated
+    - name: "Fail if vars file was not generated"
       ansible.builtin.fail:
         msg: "Migration did not create vars file at {{ output_vars_path }}"
       when: not vars_yaml_stat.stat.exists
@@ -88,31 +88,31 @@
     rendered_template_path: "{{ project_dir }}/templates/config_target.j2"
     output_xml_path: "{{ project_dir }}/final/client1_config.xml"
   tasks:
-    - name: Load generated variables
+    - name: "Load generated variables"
       ansible.builtin.include_vars:
         file: "{{ output_vars_path }}"
 
-    - name: Debug: show top-level generated vars keys
+    - name: "Debug: show top-level generated vars keys"
       ansible.builtin.debug:
         msg: "generated vars keys={{ vars.keys() | list }}"
 
-    - name: Debug: show 'messaging' as YAML
+    - name: "Debug: show 'messaging' as YAML"
       ansible.builtin.debug:
         msg: "{{ messaging | default({}) | to_nice_yaml }}"
 
-    - name: Debug: is 'messaging' a mapping?
+    - name: "Debug: is 'messaging' a mapping?"
       ansible.builtin.debug:
         msg: "messaging_is_mapping={{ messaging is mapping }}"
 
-    - name: Debug: show 'modules' as YAML
+    - name: "Debug: show 'modules' as YAML"
       ansible.builtin.debug:
         msg: "{{ modules | default({}) | to_nice_yaml }}"
 
-    - name: Debug: is 'modules' a mapping?
+    - name: "Debug: is 'modules' a mapping?"
       ansible.builtin.debug:
         msg: "modules_is_mapping={{ modules is mapping }}"
 
-    - name: Generate client1_config.xml locally
+    - name: "Generate client1_config.xml locally"
       ansible.builtin.template:
         src: "{{ rendered_template_path }}"
         dest: "{{ output_xml_path }}"
@@ -124,7 +124,7 @@
     project_dir: "{{ playbook_dir }}"
     windows_output_path: "C:\\Users\\vboxuser\\Desktop\\project\\final_config.xml"
   tasks:
-    - name: Send final_config.xml to Windows target
+    - name: "Send final_config.xml to Windows target"
       ansible.windows.win_copy:
         src: "{{ project_dir }}/final/client1_config.xml"
         dest: "{{ windows_output_path }}"
@@ -137,7 +137,7 @@
     debug_dir: "{{ project_dir }}/debug"
     python_executable: "{{ lookup('env','HOME') }}/venvs/migration/bin/python3"
   tasks:
-    - name: Run score_probe.py
+    - name: "Run score_probe.py"
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
@@ -145,12 +145,12 @@
       register: score_probe_out
       ignore_errors: true
 
-    - name: Save score_probe output
+    - name: "Save score_probe output"
       ansible.builtin.copy:
         content: "{{ score_probe_out.stdout }}\n{{ score_probe_out.stderr }}"
         dest: "{{ debug_dir }}/score_probe.log"
 
-    - name: Run test_xml_migration.py
+    - name: "Run test_xml_migration.py"
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
@@ -160,12 +160,12 @@
       register: test_xml_out
       ignore_errors: true
 
-    - name: Save test_xml_migration output
+    - name: "Save test_xml_migration output"
       ansible.builtin.copy:
         content: "{{ test_xml_out.stdout }}\n{{ test_xml_out.stderr }}"
         dest: "{{ debug_dir }}/test_xml_migration.log"
 
-    - name: Run debug_match.py
+    - name: "Run debug_match.py"
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
@@ -173,12 +173,12 @@
       register: debug_match_out
       ignore_errors: true
 
-    - name: Save debug_match output
+    - name: "Save debug_match output"
       ansible.builtin.copy:
         content: "{{ debug_match_out.stdout }}\n{{ debug_match_out.stderr }}"
         dest: "{{ debug_dir }}/debug_match.log"
 
-    - name: Run debug_parser.py
+    - name: "Run debug_parser.py"
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
@@ -186,7 +186,7 @@
       register: debug_parser_out
       ignore_errors: true
 
-    - name: Save debug_parser output
+    - name: "Save debug_parser output"
       ansible.builtin.copy:
         content: "{{ debug_parser_out.stdout }}\n{{ debug_parser_out.stderr }}"
         dest: "{{ debug_dir }}/debug_parser.log"
