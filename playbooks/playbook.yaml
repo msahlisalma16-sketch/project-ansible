@@ -125,7 +125,7 @@
   tasks:
     - name: "Send final_config.xml to Windows target"
       ansible.windows.win_copy:
-        src: "{{ project_dir }}/final/client1_config.xml"
+        src: "{{ project_dir }}/../final/client1_config.xml"
         dest: "{{ windows_output_path }}"
 
 - name: Run tests and debug scripts
