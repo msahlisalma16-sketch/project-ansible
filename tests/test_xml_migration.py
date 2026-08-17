@@ -1,19 +1,15 @@
 import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.append(str(ROOT / "utils"))
-
-import xml_migration as m
-import config
+from utils import xml_migration as m
+from utils import config
 
 
 class TestXmlMigration(unittest.TestCase):
     def test_extract_placeholders(self):
-        master_template_path = ROOT / "files" / "master_templates" / "master_config.xml"
+        master_template_path = Path("files/master_templates/master_config.xml")
         placeholders, tree = m.extract_placeholders(master_template_path)
 
         self.assertIsInstance(placeholders, list)
@@ -26,8 +22,8 @@ class TestXmlMigration(unittest.TestCase):
         self.assertIn("signature", placeholder)
         self.assertIn("leaf", placeholder["signature"])
 
-    def test_parse_v1(self):
-        source_xml_path = ROOT / "files" / "client_sources" / "client2_source.xml"
+    def test_parse_source_xml(self):
+        source_xml_path = Path("files/client_sources/client2_source.xml")
         values = m.parse_v1(source_xml_path)
 
         self.assertIsInstance(values, list)
@@ -51,14 +47,14 @@ class TestXmlMigration(unittest.TestCase):
             self.assertIn("port", contents)
 
     def test_config_defaults_and_env_override(self):
-        self.assertIsNotNone(config.V1_PATH)
-        self.assertIsNotNone(config.V5_PATH)
+        self.assertIsNotNone(config.SOURCE_XML_PATH)
+        self.assertIsNotNone(config.MASTER_TEMPLATE_PATH)
 
-        os.environ["XML_V1_PATH"] = "files/custom_v1.xml"
+        os.environ["XML_SOURCE_PATH"] = "files/custom_source.xml"
         config.reload_config()
-        self.assertEqual(config.V1_PATH, Path("files/custom_v1.xml"))
+        self.assertEqual(config.SOURCE_XML_PATH, Path("files/custom_source.xml"))
 
-        del os.environ["XML_V1_PATH"]
+        del os.environ["XML_SOURCE_PATH"]
         config.reload_config()
 
 
