@@ -116,17 +116,12 @@
     output_xml_path: "{{ project_dir }}/final/final_config.xml"
 
 
-- name: Copy final_config.xml to Windows
-  hosts: windows
-  gather_facts: false
-  vars:
-    project_dir: "{{ playbook_dir }}"
-    windows_output_path: "C:\\Users\\vboxuser\\Desktop\\project\\final_config.xml"
-  tasks:
-    - name: "Send final_config.xml to Windows target"
-      ansible.windows.win_copy:
-        src: "{{ project_dir }}/../final/client1_config.xml"
-        dest: "{{ windows_output_path }}"
+- name: Copy all client configs to Windows
+  win_copy:
+    src: "{{ item }}"
+    dest: "C:\\Users\\vboxuser\\Desktop\\project\\{{ item | basename }}"
+  with_fileglob:
+    - "{{ final_dir }}/*.xml"
 
 - name: Run tests and debug scripts
   hosts: localhost
