@@ -35,7 +35,7 @@
   hosts: localhost
   gather_facts: false
   vars:
-    project_dir: "{{ playbook_dir }}"
+    project_dir: "{{ playbook_dir }}/.."
     python_executable: python3
 
   tasks:
@@ -43,7 +43,7 @@
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
-          - "{{ project_dir }}/../utils/xml_migration.py"
+          - "{{ project_dir }}/utils/xml_migration.py"
           - "{{ project_dir }}/files/client_sources/client1_source.xml"
           - "{{ project_dir }}/files/master_templates/master_config.xml"
           - --out-template
