@@ -145,7 +145,7 @@
       register: score_probe_out
       ignore_errors: true
       environment:
-        PYTHONPATH: "{{ project_dir }}/utils"
+        PYTHONPATH: "{{ project_dir }}"
 
     - name: Save score_probe output
       ansible.builtin.copy:
@@ -162,7 +162,7 @@
       register: test_xml_out
       ignore_errors: true
       environment:
-        PYTHONPATH: "{{ project_dir }}/utils"
+        PYTHONPATH: "{{ project_dir }}"
 
     - name: Save test_xml_migration output
       ansible.builtin.copy:
@@ -177,7 +177,7 @@
       register: debug_match_out
       ignore_errors: true
       environment:
-        PYTHONPATH: "{{ project_dir }}/utils"
+        PYTHONPATH: "{{ project_dir }}"
 
     - name: Save debug_match output
       ansible.builtin.copy:
@@ -192,7 +192,7 @@
       register: debug_parser_out
       ignore_errors: true
       environment:
-        PYTHONPATH: "{{ project_dir }}/utils"
+        PYTHONPATH: "{{ project_dir }}"
 
     - name: Save debug_parser output
       ansible.builtin.copy:
