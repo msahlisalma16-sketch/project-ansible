@@ -119,6 +119,8 @@
 - name: Copy final configs to Windows
   hosts: windows
   gather_facts: no
+  vars:
+    final_dir: "/var/lib/jenkins/workspace/ansible-pipeline/final"
   tasks:
     - name: Copy all client configs to Windows
       win_copy:
