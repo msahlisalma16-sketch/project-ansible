@@ -137,56 +137,64 @@
     debug_dir: "{{ project_dir }}/debug"
     python_executable: "{{ lookup('env','HOME') }}/venvs/migration/bin/python3"
   tasks:
-    - name: "Run score_probe.py"
+    - name: Run score_probe.py
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
           - "{{ project_dir }}/tests/score_probe.py"
       register: score_probe_out
       ignore_errors: true
+      environment:
+        PYTHONPATH: "{{ project_dir }}/utils"
 
-    - name: "Save score_probe output"
+    - name: Save score_probe output
       ansible.builtin.copy:
         content: "{{ score_probe_out.stdout }}\n{{ score_probe_out.stderr }}"
         dest: "{{ debug_dir }}/score_probe.log"
 
-    - name: "Run test_xml_migration.py"
+    - name: Run test_xml_migration.py
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
           - -m
           - unittest
-          - "{{ project_dir }}/tests/test_xml_migration.py"
+          - tests.test_xml_migration
       register: test_xml_out
       ignore_errors: true
+      environment:
+        PYTHONPATH: "{{ project_dir }}/utils"
 
-    - name: "Save test_xml_migration output"
+    - name: Save test_xml_migration output
       ansible.builtin.copy:
         content: "{{ test_xml_out.stdout }}\n{{ test_xml_out.stderr }}"
         dest: "{{ debug_dir }}/test_xml_migration.log"
 
-    - name: "Run debug_match.py"
+    - name: Run debug_match.py
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
           - "{{ project_dir }}/utils/debug_match.py"
       register: debug_match_out
       ignore_errors: true
+      environment:
+        PYTHONPATH: "{{ project_dir }}/utils"
 
-    - name: "Save debug_match output"
+    - name: Save debug_match output
       ansible.builtin.copy:
         content: "{{ debug_match_out.stdout }}\n{{ debug_match_out.stderr }}"
         dest: "{{ debug_dir }}/debug_match.log"
 
-    - name: "Run debug_parser.py"
+    - name: Run debug_parser.py
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
           - "{{ project_dir }}/utils/debug_parser.py"
       register: debug_parser_out
       ignore_errors: true
+      environment:
+        PYTHONPATH: "{{ project_dir }}/utils"
 
-    - name: "Save debug_parser output"
+    - name: Save debug_parser output
       ansible.builtin.copy:
         content: "{{ debug_parser_out.stdout }}\n{{ debug_parser_out.stderr }}"
         dest: "{{ debug_dir }}/debug_parser.log"
