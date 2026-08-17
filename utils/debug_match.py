@@ -12,8 +12,6 @@ def main():
         print("Debug match results:")
         print(f"Template placeholders count: {len(placeholders)}")
         print(f"Source XML element count: {len(source_tree)}")
-
-        # Optionally show the first few placeholders
         for ph in placeholders[:5]:
             print(f" - {ph['placeholder']}")
     except Exception as e:

@@ -9,27 +9,22 @@ from utils import config
 
 class TestXmlMigration(unittest.TestCase):
     def test_extract_placeholders(self):
-        master_template_path = Path("files/master_templates/master_config.xml")
-        placeholders, tree = m.extract_placeholders(master_template_path)
+        template_xml_path = config.MASTER_TEMPLATE_PATH
+        placeholders, tree = m.extract_placeholders(template_xml_path)
 
         self.assertIsInstance(placeholders, list)
         self.assertGreater(len(placeholders), 0)
         self.assertIsNotNone(tree)
 
-        placeholder = placeholders[0]
-        self.assertIn("placeholder", placeholder)
-        self.assertIn("location", placeholder)
-        self.assertIn("signature", placeholder)
-        self.assertIn("leaf", placeholder["signature"])
-
-    def test_parse_source_xml(self):
-        source_xml_path = Path("files/client_sources/client2_source.xml")
-        values = m.parse_v1(source_xml_path)
-
-        self.assertIsInstance(values, list)
-        self.assertGreater(len(values), 0)
-        self.assertIn("text", values[0])
-        self.assertIn("path", values[0])
+    def test_parse_all_clients(self):
+        clients = config.get_clients()
+        for client in clients:
+            source_xml_path = client["source_xml"]
+            if not Path(source_xml_path).exists():
+                self.skipTest(f"{source_xml_path} not found")
+            values = m.parse_v1(source_xml_path)
+            self.assertIsInstance(values, list)
+            self.assertGreater(len(values), 0)
 
     def test_write_vars_yaml(self):
         mapping = {

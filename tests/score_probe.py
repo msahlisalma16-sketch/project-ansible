@@ -1,5 +1,5 @@
-from utils import config
 from utils import xml_migration as m
+from utils import config
 
 def main():
     source_xml_path = config.SOURCE_XML_PATH
@@ -10,8 +10,8 @@ def main():
         source_tree = m.parse_v1(source_xml_path)
 
         print("Score probe successful.")
-        print(f"Found {len(placeholders)} placeholders in template XML")
-        print(f"Parsed source XML with {len(source_tree)} elements")
+        print(f"Template XML contains {len(placeholders)} placeholders")
+        print(f"Source XML parsed with {len(source_tree)} elements")
     except Exception as e:
         print("Score probe failed:", e)
 
