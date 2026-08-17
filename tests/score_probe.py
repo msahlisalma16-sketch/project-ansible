@@ -1,6 +1,6 @@
 import sys
 sys.path.append('./utils')   # add utils folder to Python path
-import xml_migration as m
+from utils import xml_migration as m
 import config
 
 def main():
