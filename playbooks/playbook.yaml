@@ -114,11 +114,6 @@
     project_dir: "{{ playbook_dir }}/.."
     render_template_path: "{{ project_dir }}/templates/config_target.j2"
     output_xml_path: "{{ project_dir }}/final/final_config.xml"
-  tasks:
-    - name: Render final XML with Jinja2
-      ansible.builtin.template:
-        src: "{{ render_template_path }}"
-        dest: "{{ output_xml_path }}"
 
 
 - name: Copy final_config.xml to Windows
