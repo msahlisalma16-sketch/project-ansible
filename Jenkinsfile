@@ -35,4 +35,13 @@ pipeline {
             }
         }
     }
+    post {
+        success {
+            archiveArtifacts artifacts: 'files/**, templates/**, final/**, reports/**, vars/**', fingerprint: true
+        }
+        failure {
+            echo 'Pipeline failed — no artifacts archived.'
+        }
+    }
 }
+
