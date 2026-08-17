@@ -345,7 +345,6 @@ def write_ai_review(review_lines: List[str], review_path: Path) -> None:
         f.write("- These suggestions do not affect vars or final output.\n\n")
         for line in review_lines:
             f.write(line + "\n")
-
 def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_path: Path) -> None:
     """Render the Jinja2 template with mapped variables to produce the final XML file with filled placeholders."""
     if not template_path.exists():
