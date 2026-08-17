@@ -362,16 +362,21 @@ def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_
             d = d.setdefault(p, {})
         d[parts[-1]] = val
 
-    try:
-        import jinja2
-        template = jinja2.Template(template_str)
-        rendered = template.render(**nested)
-    except Exception:
-        rendered = template_str
-        for ph, val in mapping.items():
-            rendered = rendered.replace(f"{{{{ {ph} }}}}", str(val))
+   try:
+    import jinja2
+    # Use Undefined so missing placeholders render as empty instead of error
+    template = jinja2.Template(
+        template_str,
+        undefined=jinja2.Undefined
+    )
+    rendered = template.render(**nested)
 
-    out_final_path.write_text(rendered, encoding="utf-8")
+except Exception:
+    rendered = template_str
+    for ph, val in mapping.items():
+        rendered = rendered.replace(f"{{{{ {ph} }}}}", str(val))
+
+out_final_path.write_text(rendered, encoding="utf-8")
 
 
 def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], template_path: Path) -> None:
