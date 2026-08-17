@@ -116,12 +116,16 @@
     output_xml_path: "{{ project_dir }}/final/final_config.xml"
 
 
-- name: Copy all client configs to Windows
-  win_copy:
-    src: "{{ item }}"
-    dest: "C:\\Users\\vboxuser\\Desktop\\project\\{{ item | basename }}"
-  with_fileglob:
-    - "{{ final_dir }}/*.xml"
+- name: Copy final configs to Windows
+  hosts: windows
+  gather_facts: no
+  tasks:
+    - name: Copy all client configs to Windows
+      win_copy:
+        src: "{{ item }}"
+        dest: "C:\\Users\\vboxuser\\Desktop\\project\\{{ item | basename }}"
+      with_fileglob:
+        - "{{ final_dir }}/*.xml"
 
 - name: Run tests and debug scripts
   hosts: localhost
