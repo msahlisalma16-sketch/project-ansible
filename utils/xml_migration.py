@@ -396,24 +396,19 @@ def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], t
 
     print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {ai_review}")
 
-
 def main() -> None:
     parser = argparse.ArgumentParser(description="Robust XML migration with namespace/CDATA support.")
-    parser.add_argument("source_xml", nargs="?", default=None, help="Path to client source XML file")
-    parser.add_argument("master_template_path", nargs="?", default=None, help="Path to master template XML file")
-    parser.add_argument("--out-template", default=str(config.OUT_TEMPLATE))
-    parser.add_argument("--out-vars", default=None)
-    parser.add_argument("--out-final", default=None, help="Path to rendered final output XML with filled placeholders")
-    parser.add_argument("--out-report", default=None)
-    parser.add_argument(
-        "--ai-review",
-        default=None,
-        help="Write a separate AI review report for candidate suggestions.",
-    )
+    parser.add_argument("source_xml", help="Path to client source XML file")
+    parser.add_argument("master_template_path", help="Path to master template XML file")
+    parser.add_argument("--out-template", default="templates/config_target.j2")
+    parser.add_argument("--out-vars", default="vars/vars_client1.yaml")
+    parser.add_argument("--out-final", default="final/client1_config.xml")
+    parser.add_argument("--out-report", default="reports/mappings/mapping_report_client1.txt")
+    parser.add_argument("--ai-review", default="reports/ai_reviews/mapping_ai_review_client1.txt")
     args = parser.parse_args()
 
     # Master template path
-    master_template_path = Path(args.master_template_path) if args.master_template_path else config.MASTER_TEMPLATE_PATH
+    master_template_path = Path(args.master_template_path)
     out_template = Path(args.out_template)
 
     print(f"Extracting master placeholders from {master_template_path}...")
@@ -421,25 +416,17 @@ def main() -> None:
     convert_to_jinja2(master_tree, out_template)
     print(f"Master template created at {out_template}")
 
-    # If explicit CLI positional args were passed for a single file migration
-    if args.source_xml or args.out_vars or args.out_final:
-        single_client = {
-            "name": "custom",
-            "source_xml": Path(args.source_xml) if args.source_xml else config.SOURCE_XML_PATH,
-            "v1_path": Path(args.source_xml) if args.source_xml else config.SOURCE_XML_PATH,
-            "out_vars": Path(args.out_vars) if args.out_vars else config.OUT_VARS,
-            "out_final": Path(args.out_final) if args.out_final else config.OUT_FINAL,
-            "out_report": Path(args.out_report) if args.out_report else config.OUT_REPORT,
-            "ai_review": Path(args.ai_review) if args.ai_review else config.AI_REVIEW,
-        }
-        process_client(single_client, placeholders, out_template)
-    else:
-        # Multi-client processing mode
-        clients = config.get_clients()
-        print(f"Processing {len(clients)} client(s) defined in config...")
-        for client in clients:
-            process_client(client, placeholders, out_template)
-
+    # Single client processing
+    single_client = {
+        "name": "client1",
+        "source_xml": Path(args.source_xml),
+        "v1_path": Path(args.source_xml),
+        "out_vars": Path(args.out_vars),
+        "out_final": Path(args.out_final),
+        "out_report": Path(args.out_report),
+        "ai_review": Path(args.ai_review),
+    }
+    process_client(single_client, placeholders, out_template)
 
 if __name__ == "__main__":
     main()
