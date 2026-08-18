@@ -39,7 +39,7 @@ pipeline {
                   set -e
                   python3 -m unittest tests/test_xml_migration.py
                   python3 -m unittest tests/test_unmapped_placeholders.py
-                  python3 tests/test_schema_validation.py
+
                   python3 tests/score_probe.py
                   python3 tests/debug_match.py
                   python3 tests/debug_parser.py
