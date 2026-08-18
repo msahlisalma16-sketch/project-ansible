@@ -28,7 +28,7 @@ pipeline {
                 withCredentials([file(credentialsId: params.VAULT_CREDENTIAL_ID, variable: 'VAULT_PASSWORD_FILE')]) {
                     sh '''
                       set -e
-                      "$ANSIBLE_CMD" --vault-password-file "$VAULT_PASSWORD_FILE" -i "$INVENTORY" playbooks/generate.yaml
+                      "$ANSIBLE_CMD" --vault-password-file "$VAULT_PASSWORD_FILE" -i "$INVENTORY" playbooks/palybook.yaml
                     '''
                 }
             }
