@@ -1,6 +1,7 @@
 import unittest
-import xml_migration   # your migration module
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "../utils"))
+import xml_migration   
 class TestUnmappedPlaceholders(unittest.TestCase):
 
     def test_unmapped_threshold(self):
