@@ -42,9 +42,9 @@ pipeline {
                   python3 -m unittest tests/test_xml_migration.py
                   python3 -m unittest tests/test_unmapped_placeholders.py
 
-                  python3 tests/score_probe.py
-                  python3 tests/debug_match.py
-                  python3 tests/debug_parser.py
+                  python3 utils/score_probe.py
+                  python3 utils/debug_match.py
+                  python3 utils/debug_parser.py
                 '''
             }
         }
