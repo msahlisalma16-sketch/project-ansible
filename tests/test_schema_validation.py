@@ -2,7 +2,7 @@ import sys
 from lxml import etree
 import glob
 
-SCHEMA_FILE = "schema.xsd"
+SCHEMA_FILE = "schemas/schema.xsd"
 XML_DIR = "final/*.xml"
 
 def validate_xmls():
