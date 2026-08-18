@@ -8,14 +8,6 @@ pipeline {
         string(name: 'VAULT_CREDENTIAL_ID', defaultValue: 'VAULT_PASS_FILE', description: 'Jenkins credential ID for the Ansible vault password file')
         string(name: 'ANSIBLE_CMD', defaultValue: 'ansible-playbook', description: 'Ansible command to execute')
     }
-    stages {
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-     pipeline {
-    agent any
 
     stages {
         stage('Checkout') {
@@ -45,25 +37,6 @@ pipeline {
 
         stage('Generate Configs') {
             steps {
-                sh '''
-                  ansible-playbook --vault-password-file $VAULT_PASSWORD_FILE -i inventory.ini playbooks/playbook.yaml
-                '''
-            }
-        }
-
-        stage('Run Tests') {
-            steps {
-                sh '''
-                  python3 -m unittest tests/test_xml_migration.py
-                  python3 -m unittest tests/test_unmapped_placeholders.py
-                '''
-            }
-        }
-    }
-}
-  
-        stage('Generate Configs') {
-            steps {
                 withCredentials([file(credentialsId: params.VAULT_CREDENTIAL_ID, variable: 'VAULT_PASSWORD_FILE')]) {
                     sh '''
                       set -e
@@ -72,12 +45,13 @@ pipeline {
                 }
             }
         }
+
         stage('Run Tests') {
             steps {
                 sh '''
                   set -e
                   export PYTHONPATH=$PYTHONPATH:/var/lib/jenkins/workspace/ansible-pipeline
-                  
+
                   python3 -m unittest tests/test_xml_migration.py
                   python3 -m unittest tests/test_unmapped_placeholders.py
 
@@ -87,8 +61,8 @@ pipeline {
                 '''
             }
         }
-        
     }
+
     post {
         success {
             archiveArtifacts artifacts: 'final/**, reports/**, vars/**, debug/**', fingerprint: true
