@@ -4,7 +4,6 @@ pipeline {
         skipDefaultCheckout()
     }
     parameters {
-        string(name: 'PLAYBOOK_NAME', defaultValue: 'playbooks/playbook.yaml', description: 'Ansible playbook to run')
         string(name: 'INVENTORY', defaultValue: 'inventory.ini', description: 'Ansible inventory file')
         string(name: 'VAULT_CREDENTIAL_ID', defaultValue: 'VAULT_PASS_FILE', description: 'Jenkins credential ID for the Ansible vault password file')
         string(name: 'ANSIBLE_CMD', defaultValue: 'ansible-playbook', description: 'Ansible command to execute')
@@ -24,12 +23,35 @@ pipeline {
                 '''
             }
         }
-        stage('Run Ansible') {
+        stage('Generate Configs') {
             steps {
                 withCredentials([file(credentialsId: params.VAULT_CREDENTIAL_ID, variable: 'VAULT_PASSWORD_FILE')]) {
                     sh '''
                       set -e
-                      "$ANSIBLE_CMD" --vault-password-file "$VAULT_PASSWORD_FILE" -i "$INVENTORY" "$PLAYBOOK_NAME"
+                      "$ANSIBLE_CMD" --vault-password-file "$VAULT_PASSWORD_FILE" -i "$INVENTORY" playbooks/generate.yaml
+                    '''
+                }
+            }
+        }
+        stage('Run Tests') {
+            steps {
+                sh '''
+                  set -e
+                  python3 -m unittest tests/test_xml_migration.py
+                  python3 -m unittest tests/test_unmapped_placeholders.py
+                  python3 tests/test_schema_validation.py
+                  python3 tests/score_probe.py
+                  python3 tests/debug_match.py
+                  python3 tests/debug_parser.py
+                '''
+            }
+        }
+        stage('Deploy to Windows') {
+            steps {
+                withCredentials([file(credentialsId: params.VAULT_CREDENTIAL_ID, variable: 'VAULT_PASSWORD_FILE')]) {
+                    sh '''
+                      set -e
+                      "$ANSIBLE_CMD" --vault-password-file "$VAULT_PASSWORD_FILE" -i "$INVENTORY" playbooks/deploy.yaml
                     '''
                 }
             }
@@ -37,10 +59,10 @@ pipeline {
     }
     post {
         success {
-            archiveArtifacts artifacts: 'files/**, templates/**, final/**, reports/**, vars/**', fingerprint: true
+            archiveArtifacts artifacts: 'final/**, reports/**, vars/**, debug/**', fingerprint: true
         }
         failure {
-            echo 'Pipeline failed — no artifacts archived.'
+            echo 'Pipeline failed — configs not deployed.'
         }
     }
 }
