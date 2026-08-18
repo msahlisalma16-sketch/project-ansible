@@ -37,6 +37,8 @@ pipeline {
             steps {
                 sh '''
                   set -e
+                  export PYTHONPATH=$PYTHONPATH:/var/lib/jenkins/workspace/ansible-pipeline
+                  
                   python3 -m unittest tests/test_xml_migration.py
                   python3 -m unittest tests/test_unmapped_placeholders.py
 

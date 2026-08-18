@@ -1,5 +1,7 @@
-from utils import xml_migration as m
 from utils import config
+import sys, os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from utils import xml_migration as m
 
 def main():
     source_xml_path = config.SOURCE_XML_PATH
