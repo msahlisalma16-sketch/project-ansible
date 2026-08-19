@@ -24,7 +24,7 @@
   tasks:
     - name: Find XML files in project folder
       win_find:
-        paths: C:\project
+        paths: C:\Users\user\Desktop\project
         patterns: '*.xml'
       register: xml_files
 
@@ -34,6 +34,8 @@
         dest: "{{ playbook_dir }}/../files/master_templates/{{ inventory_hostname }}/"
         flat: yes
       loop: "{{ xml_files.files }}"
+      loop_control:
+        label: "{{ item.path }}"
 
 - name: Generate configs for each server
   hosts: localhost
@@ -69,7 +71,35 @@
   vars:
     project_dir: "{{ playbook_dir }}/.."
     render_template_path: "{{ project_dir }}/templates/config_target.j2"
-    output_xml_path: "{{ project_dir }}/final/final_config.xml"
+- name: Generate configs for each server
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    python_executable: python3
+  tasks:
+    - name: Run migration script for each server’s XMLs
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ item.path }}"
+          - "{{ project_dir }}/files/master_templates/{{ item.invocation.module_args._ansible_host }}/master_config.xml"
+          - --out-template
+          - "{{ project_dir }}/templates/config_target.j2"
+          - --out-vars
+          - "{{ project_dir }}/vars/vars_{{ item.path | basename | regex_replace('.xml','') }}.yaml"
+          - --out-final
+          - "{{ project_dir }}/final/{{ item.invocation.module_args._ansible_host }}_{{ item.path | basename }}"
+          - --out-report
+          - "{{ project_dir }}/reports/mappings/mapping_report_{{ item.invocation.module_args._ansible_host }}_{{ item.path | basename | regex_replace('.xml','') }}.txt"
+          - --ai-review
+          - "{{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ item.invocation.module_args._ansible_host }}_{{ item.path | basename | regex_replace('.xml','') }}.txt"
+      args:
+        chdir: "{{ project_dir }}"
+      loop: "{{ hostvars | dict2items | selectattr('value.xml_files', 'defined') | map(attribute='value.xml_files.files') | flatten }}"
+      loop_control:
+        label: "{{ item.path }}"
+      changed_when: false    output_xml_path: "{{ project_dir }}/final/final_config.xml"
 
 
 - name: Run tests and debug scripts
