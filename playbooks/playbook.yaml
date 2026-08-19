@@ -18,6 +18,7 @@
         - "{{ final_dir }}"
         - "{{ debug_dir }}"
 
+
 - name: Fetch placeholder configs from Windows servers
   hosts: windows_servers
   gather_facts: false
