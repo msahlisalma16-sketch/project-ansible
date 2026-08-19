@@ -44,25 +44,27 @@
     project_dir: "{{ playbook_dir }}/.."
     python_executable: python3
   tasks:
-    - name: Run migration script for each server’s placeholders
+    - name: Run migration script for each client source XML
       ansible.builtin.command:
         argv:
           - "{{ python_executable }}"
-          - "{{ project_dir }}/utils/xml_migration.py"
-          - "{{ project_dir }}/files/master_templates/{{ item }}/master_config.xml"
+          - "{{ item }}"   # source XML with values (from client_sources)
+          - "{{ project_dir }}/files/master_templates/{{ inventory_hostname }}/master_config.xml"  # master template with placeholders
           - --out-template
           - "{{ project_dir }}/templates/config_target.j2"
           - --out-vars
-          - "{{ project_dir }}/vars/vars_{{ item }}.yaml"
+          - "{{ project_dir }}/vars/vars_{{ item | basename | regex_replace('.xml','') }}.yaml"
           - --out-final
-          - "{{ project_dir }}/final/{{ item }}_config.xml"
+          - "{{ project_dir }}/final/{{ inventory_hostname }}_{{ item | basename }}"
           - --out-report
-          - "{{ project_dir }}/reports/mappings/mapping_report_{{ item }}.txt"
+          - "{{ project_dir }}/reports/mappings/mapping_report_{{ inventory_hostname }}_{{ item | basename | regex_replace('.xml','') }}.txt"
           - --ai-review
-          - "{{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ item }}.txt"
+          - "{{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ inventory_hostname }}_{{ item | basename | regex_replace('.xml','') }}.txt"
       args:
         chdir: "{{ project_dir }}"
-      loop: "{{ groups['windows_servers'] }}"
+      loop: "{{ lookup('fileglob', project_dir + '/files/client_sources/*.xml', wantlist=True) }}"
+      loop_control:
+        label: "{{ item }}"
       changed_when: false
 
 - name: Render final XML
