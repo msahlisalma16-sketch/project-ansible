@@ -1,6 +1,12 @@
 - name: Ensure local directories exist
   hosts: localhost
   gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    files_dir: "{{ project_dir }}/files"
+    templates_dir: "{{ project_dir }}/templates"
+    final_dir: "{{ project_dir }}/final"
+    debug_dir: "{{ project_dir }}/debug"
   tasks:
     - name: Create required directories
       ansible.builtin.file:
@@ -186,3 +192,4 @@
         src: "{{ playbook_dir }}/../final/{{ inventory_hostname }}_config.xml"
         dest: C:\project\final_config.xml
 
+ 
