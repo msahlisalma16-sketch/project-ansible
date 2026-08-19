@@ -33,6 +33,7 @@ pipeline {
                   python3 -m venv .venv
                   . .venv/bin/activate
                   pip install --upgrade pip
+                  pip install torch==2.13.0+cpu --index-url https://download.pytorch.org/whl/cpu
                   pip install -r requirements.txt
                 '''
             }
