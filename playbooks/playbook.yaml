@@ -71,12 +71,14 @@
   vars:
     project_dir: "{{ playbook_dir }}/.."
     render_template_path: "{{ project_dir }}/templates/config_target.j2"
+
 - name: Generate configs for each server
   hosts: localhost
   gather_facts: false
   vars:
     project_dir: "{{ playbook_dir }}/.."
     python_executable: python3
+    output_xml_path: "{{ project_dir }}/final/final_config.xml"
   tasks:
     - name: Run migration script for each server’s XMLs
       ansible.builtin.command:
@@ -99,7 +101,7 @@
       loop: "{{ hostvars | dict2items | selectattr('value.xml_files', 'defined') | map(attribute='value.xml_files.files') | flatten }}"
       loop_control:
         label: "{{ item.path }}"
-      changed_when: false    output_xml_path: "{{ project_dir }}/final/final_config.xml"
+      changed_when: false
 
 
 - name: Run tests and debug scripts
