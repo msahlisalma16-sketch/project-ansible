@@ -80,23 +80,6 @@
     render_template_path: "{{ project_dir }}/templates/config_target.j2"
     output_xml_path: "{{ project_dir }}/final/final_config.xml"
 
-- name: Render final XML
-  hosts: localhost
-  gather_facts: false
-  vars:
-    project_dir: "{{ playbook_dir }}/.."
-    render_template_path: "{{ project_dir }}/templates/config_target.j2"
-    output_xml_path: "{{ project_dir }}/final/final_config.xml"
-
-- name: Render final XML
-  hosts: localhost
-  gather_facts: false
-  vars:
-    project_dir: "{{ playbook_dir }}/.."
-    render_template_path: "{{ project_dir }}/templates/config_target.j2"
-    output_xml_path: "{{ project_dir }}/final/final_config.xml"
-
-
 
 - name: Run tests and debug scripts
   hosts: localhost
