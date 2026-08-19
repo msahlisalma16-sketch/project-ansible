@@ -1,12 +1,16 @@
 - name: Ensure local directories exist
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: directory
-  loop:
-    - "{{ files_dir }}"
-    - "{{ templates_dir }}"
-    - "{{ final_dir }}"
-    - "{{ debug_dir }}"
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create required directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ files_dir }}"
+        - "{{ templates_dir }}"
+        - "{{ final_dir }}"
+        - "{{ debug_dir }}"
 
 - name: Fetch placeholder configs from Windows servers
   hosts: windows_servers
