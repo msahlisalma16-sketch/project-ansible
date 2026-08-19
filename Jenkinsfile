@@ -29,7 +29,7 @@ pipeline {
         stage('Setup Python deps') {
             steps {
                 sh '''
-                  set -e
+                  rm -rf .venv
                   python3 -m venv .venv
                   . .venv/bin/activate
                   pip install --upgrade pip
