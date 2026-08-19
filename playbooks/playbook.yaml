@@ -22,11 +22,18 @@
   hosts: windows_servers
   gather_facts: false
   tasks:
-    - name: Fetch project XMLs with placeholders
+    - name: Find XML files in project folder
+      win_find:
+        paths: C:\project
+        patterns: '*.xml'
+      register: xml_files
+
+    - name: Fetch each XML file
       fetch:
-        src: C:\project\*.xml
+        src: "{{ item.path }}"
         dest: "{{ playbook_dir }}/../files/master_templates/{{ inventory_hostname }}/"
         flat: yes
+      loop: "{{ xml_files.files }}"
 
 - name: Generate configs for each server
   hosts: localhost
