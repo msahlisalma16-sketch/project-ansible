@@ -1,0 +1,191 @@
+- name: Prepare local directories
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    files_dir: "{{ project_dir }}/files"
+    templates_dir: "{{ project_dir }}/templates"
+    final_dir: "{{ project_dir }}/final"
+    debug_dir: "{{ project_dir }}/debug"
+  tasks:
+    - name: Ensure local directories exist
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ files_dir }}"
+        - "{{ templates_dir }}"
+        - "{{ final_dir }}"
+        - "{{ debug_dir }}"
+
+- name: Fetch master_config.xml from Windows
+  hosts: beta
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    remote_master_path: "C:\\Users\\user\\Desktop\\project\\master_config.xml"
+    local_master_path: "{{ project_dir }}/files/master_templates/master_config.xml"
+  tasks:
+    - name: Fetch master_config.xml from Windows target
+      ansible.builtin.fetch:
+        src: "{{ remote_master_path }}"
+        dest: "{{ local_master_path }}"
+
+- name: Generate XML migration artifacts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    python_executable: python3
+  tasks:
+    - name: Verify client1 source XML exists
+      ansible.builtin.stat:
+        path: "{{ project_dir }}/files/client_sources/client1_source.xml"
+      register: client1_source_stat
+
+    - name: Fail if client1 source XML is missing
+      ansible.builtin.fail:
+        msg: "client1_source.xml is missing in files/client_sources/"
+      when: not client1_source_stat.stat.exists
+    - name: Debug resolved paths
+      ansible.builtin.debug:
+        msg:
+          - "Project dir: {{ project_dir }}"
+          - "Client1 source: {{ project_dir }}/files/client_sources/client1_source.xml"
+          - "Master template: {{ project_dir }}/files/master_templates/master_config.xml"
+          - "Utils script: {{ project_dir }}/utils/xml_migration.py"
+
+    - name: Run XML migration script for client1
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/utils/xml_migration.py"
+          - "{{ project_dir }}/files/client_sources/client1_source.xml"
+          - "{{ project_dir }}/files/master_templates/master_config.xml"
+          - --out-template
+          - "{{ project_dir }}/templates/config_target.j2"
+          - --out-vars
+          - "{{ project_dir }}/vars/vars_client1.yaml"
+          - --out-final
+          - "{{ project_dir }}/final/client1_config.xml"
+          - --out-report
+          - "{{ project_dir }}/reports/mappings/mapping_report_client1.txt"
+          - "{{ project_dir }}/reports/ai_reviews/mapping_ai_review_client1.txt"
+      args:
+        chdir: "{{ project_dir }}"
+      changed_when: false
+
+    - name: Verify client2 source XML exists
+      ansible.builtin.stat:
+        path: "{{ project_dir }}/files/client_sources/client2_source.xml"
+      register: client2_source_stat
+
+    - name: Fail if client2 source XML is missing
+      ansible.builtin.fail:
+        msg: "client2_source.xml is missing in files/client_sources/"
+      when: not client2_source_stat.stat.exists
+
+    - name: Run XML migration script for client2
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/utils/xml_migration.py"
+          - "{{ project_dir }}/files/client_sources/client2_source.xml"
+          - "{{ project_dir }}/files/master_templates/master_config.xml"
+          - --out-template
+          - "{{ project_dir }}/templates/config_target.j2"
+          - --out-vars
+          - "{{ project_dir }}/vars/vars_client2.yaml"
+          - --out-final
+          - "{{ project_dir }}/final/client2_config.xml"
+          - --out-report
+          - "{{ project_dir }}/reports/mappings/mapping_report_client2.txt"
+          - --ai-review
+          - "{{ project_dir }}/reports/ai_reviews/mapping_ai_review_client2.txt"
+      args:
+        chdir: "{{ project_dir }}"
+      changed_when: false
+
+- name: Render final XML
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    render_template_path: "{{ project_dir }}/templates/config_target.j2"
+    output_xml_path: "{{ project_dir }}/final/final_config.xml"
+
+
+- name: Copy final configs to Windows
+  hosts: windows
+  gather_facts: no
+  vars:
+    final_dir: "/var/lib/jenkins/workspace/ansible-pipeline/final"
+  tasks:
+    - name: Copy all client configs to Windows
+      win_copy:
+        src: "{{ item }}"
+        dest: "C:\\Users\\vboxuser\\Desktop\\project\\{{ item | basename }}"
+      with_fileglob:
+        - "{{ final_dir }}/*.xml"
+
+- name: Run tests and debug scripts
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    debug_dir: "{{ project_dir }}/debug"
+    python_executable: "{{ lookup('env','HOME') }}/venvs/migration/bin/python3"
+  tasks:
+    - name: "Run score_probe.py"
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/tests/score_probe.py"
+      register: score_probe_out
+      ignore_errors: true
+
+    - name: "Save score_probe output"
+      ansible.builtin.copy:
+        content: "{{ score_probe_out.stdout }}\n{{ score_probe_out.stderr }}"
+        dest: "{{ debug_dir }}/score_probe.log"
+
+    - name: "Run test_xml_migration.py"
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - -m
+          - unittest
+          - "{{ project_dir }}/tests/test_xml_migration.py"
+      register: test_xml_out
+      ignore_errors: true
+
+    - name: "Save test_xml_migration output"
+      ansible.builtin.copy:
+        content: "{{ test_xml_out.stdout }}\n{{ test_xml_out.stderr }}"
+        dest: "{{ debug_dir }}/test_xml_migration.log"
+
+    - name: "Run debug_match.py"
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/utils/debug_match.py"
+      register: debug_match_out
+      ignore_errors: true
+
+    - name: "Save debug_match output"
+      ansible.builtin.copy:
+        content: "{{ debug_match_out.stdout }}\n{{ debug_match_out.stderr }}"
+        dest: "{{ debug_dir }}/debug_match.log"
+
+    - name: "Run debug_parser.py"
+      ansible.builtin.command:
+        argv:
+          - "{{ python_executable }}"
+          - "{{ project_dir }}/utils/debug_parser.py"
+      register: debug_parser_out
+      ignore_errors: true
+
+    - name: "Save debug_parser output"
+      ansible.builtin.copy:
+        content: "{{ debug_parser_out.stdout }}\n{{ debug_parser_out.stderr }}"
+        dest: "{{ debug_dir }}/debug_parser.log"

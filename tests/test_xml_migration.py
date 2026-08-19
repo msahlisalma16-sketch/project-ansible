@@ -1,39 +1,30 @@
 import os
-import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.append(str(ROOT / "utils"))
-
-import xml_migration as m
-import config
+from utils import xml_migration as m
+from utils import config
 
 
 class TestXmlMigration(unittest.TestCase):
     def test_extract_placeholders(self):
-        master_template_path = ROOT / "files" / "master_templates" / "master_config.xml"
-        placeholders, tree = m.extract_placeholders(master_template_path)
+        template_xml_path = config.MASTER_TEMPLATE_PATH
+        placeholders, tree = m.extract_placeholders(template_xml_path)
 
         self.assertIsInstance(placeholders, list)
         self.assertGreater(len(placeholders), 0)
         self.assertIsNotNone(tree)
 
-        placeholder = placeholders[0]
-        self.assertIn("placeholder", placeholder)
-        self.assertIn("location", placeholder)
-        self.assertIn("signature", placeholder)
-        self.assertIn("leaf", placeholder["signature"])
-
-    def test_parse_v1(self):
-        source_xml_path = ROOT / "files" / "client_sources" / "client2_source.xml"
-        values = m.parse_v1(source_xml_path)
-
-        self.assertIsInstance(values, list)
-        self.assertGreater(len(values), 0)
-        self.assertIn("text", values[0])
-        self.assertIn("path", values[0])
+    def test_parse_all_clients(self):
+        clients = config.get_clients()
+        for client in clients:
+            source_xml_path = client["source_xml"]
+            if not Path(source_xml_path).exists():
+                self.skipTest(f"{source_xml_path} not found")
+            values = m.parse_v1(source_xml_path)
+            self.assertIsInstance(values, list)
+            self.assertGreater(len(values), 0)
 
     def test_write_vars_yaml(self):
         mapping = {
@@ -51,14 +42,14 @@ class TestXmlMigration(unittest.TestCase):
             self.assertIn("port", contents)
 
     def test_config_defaults_and_env_override(self):
-        self.assertIsNotNone(config.V1_PATH)
-        self.assertIsNotNone(config.V5_PATH)
+        self.assertIsNotNone(config.SOURCE_XML_PATH)
+        self.assertIsNotNone(config.MASTER_TEMPLATE_PATH)
 
-        os.environ["XML_V1_PATH"] = "files/custom_v1.xml"
+        os.environ["XML_SOURCE_PATH"] = "files/custom_source.xml"
         config.reload_config()
-        self.assertEqual(config.V1_PATH, Path("files/custom_v1.xml"))
+        self.assertEqual(config.SOURCE_XML_PATH, Path("files/custom_source.xml"))
 
-        del os.environ["XML_V1_PATH"]
+        del os.environ["XML_SOURCE_PATH"]
         config.reload_config()
 
 

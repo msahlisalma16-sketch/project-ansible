@@ -8,6 +8,7 @@ import os
 import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING
+import xml.sax.saxutils as saxutils
 
 try:
     import config
@@ -32,6 +33,8 @@ except ImportError:
 
 _ai_model: Optional["SentenceTransformer"] = None
 
+def safe_text(value: str) -> str:
+    return saxutils.escape(value) if value else ""
 
 def strip_namespace(tag: Any) -> str:
     """Remove XML namespace prefix from a tag name."""
@@ -247,7 +250,7 @@ def parse_v1(v1_path: Path) -> List[Dict[str, Any]]:
                 "signature_name": signature_name,
                 "signature_key": signature_key,
                 "attribute": attr,
-                "text": val,
+                "text": safe_text(val),
                 "path": f"{current_path}/@{attr}",
             })
 
@@ -258,7 +261,7 @@ def parse_v1(v1_path: Path) -> List[Dict[str, Any]]:
                 "signature_name": signature_name,
                 "signature_key": signature_key,
                 "attribute": None,
-                "text": element.text.strip(),
+                "text": safe_text(element.text.strip()),
                 "path": f"{current_path}/text",
             })
 
@@ -345,8 +348,6 @@ def write_ai_review(review_lines: List[str], review_path: Path) -> None:
         f.write("- These suggestions do not affect vars or final output.\n\n")
         for line in review_lines:
             f.write(line + "\n")
-
-
 def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_path: Path) -> None:
     """Render the Jinja2 template with mapped variables to produce the final XML file with filled placeholders."""
     if not template_path.exists():
@@ -364,15 +365,20 @@ def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_
 
     try:
         import jinja2
-        template = jinja2.Template(template_str)
+        # Use Undefined so missing placeholders render as empty instead of error
+        template = jinja2.Template(
+            template_str,
+            undefined=jinja2.Undefined
+        )
         rendered = template.render(**nested)
+
     except Exception:
         rendered = template_str
         for ph, val in mapping.items():
-            rendered = rendered.replace(f"{{{{ {ph} }}}}", str(val))
+            rendered = rendered.replace(f"{{{{ {ph} }}}}", safe_text(str(val)))
+
 
     out_final_path.write_text(rendered, encoding="utf-8")
-
 
 def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], template_path: Path) -> None:
     """Process migration for a single client against the extracted placeholders and master template."""
