@@ -42,6 +42,7 @@
 
         flat: yes
 
+
 - name: Generate XML migration artifacts
   hosts: localhost
   gather_facts: false
@@ -70,6 +71,14 @@
         chdir: "{{ project_dir }}"
       loop: "{{ lookup('fileglob', project_dir + '/files/client_sources/*.xml', wantlist=True) }}"
       changed_when: false
+
+- name: Render final XML
+  hosts: localhost
+  gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    render_template_path: "{{ project_dir }}/templates/config_target.j2"
+    output_xml_path: "{{ project_dir }}/final/final_config.xml"
 
 - name: Render final XML
   hosts: localhost
