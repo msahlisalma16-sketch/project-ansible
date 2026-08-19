@@ -29,8 +29,11 @@ pipeline {
         stage('Setup Python deps') {
             steps {
                 sh '''
-                  python3 -m pip install --upgrade pip
-                  python3 -m pip install sentence-transformers torch --index-url https://download.pytorch.org/whl/cpu
+                  set -e
+                  python3 -m venv .venv
+                  . .venv/bin/activate
+                  pip install --upgrade pip
+                  pip install -r requirements.txt
                 '''
             }
         }
@@ -40,6 +43,7 @@ pipeline {
                 withCredentials([file(credentialsId: params.VAULT_CREDENTIAL_ID, variable: 'VAULT_PASSWORD_FILE')]) {
                     sh '''
                       set -e
+                      . .venv/bin/activate
                       "$ANSIBLE_CMD" --vault-password-file "$VAULT_PASSWORD_FILE" -i "$INVENTORY" playbooks/playbook.yaml
                     '''
                 }
@@ -50,14 +54,15 @@ pipeline {
             steps {
                 sh '''
                   set -e
+                  . .venv/bin/activate
                   export PYTHONPATH=$PYTHONPATH:/var/lib/jenkins/workspace/ansible-pipeline
 
-                  python3 -m unittest tests/test_xml_migration.py
-                  python3 -m unittest tests/test_unmapped_placeholders.py
+                  python -m unittest tests/test_xml_migration.py
+                  python -m unittest tests/test_unmapped_placeholders.py
 
-                  python3 tests/score_probe.py
-                  python3 utils/debug_match.py
-                  python3 utils/debug_parser.py
+                  python tests/score_probe.py
+                  python utils/debug_match.py
+                  python utils/debug_parser.py
                 '''
             }
         }
@@ -69,6 +74,9 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed — configs not deployed.'
+        }
+        always {
+            archiveArtifacts artifacts: 'reports/**', fingerprint: true
         }
     }
 }
