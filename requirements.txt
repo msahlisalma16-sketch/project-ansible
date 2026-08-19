@@ -1,3 +1,5 @@
 lxml
 PyYAML
+torch --index-url https://download.pytorch.org/whl/cpu
 sentence-transformers
+
