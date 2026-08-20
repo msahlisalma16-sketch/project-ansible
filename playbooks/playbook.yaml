@@ -11,7 +11,6 @@
     vars_dir: "{{ project_dir }}/vars"
     reports_dir: "{{ project_dir }}/reports"
     mappings_dir: "{{ project_dir }}/reports/mappings"
-    ai_reviews_dir: "{{ project_dir }}/reports/ai_reviews"
   tasks:
     - name: Ensure local directories exist
       ansible.builtin.file:
@@ -26,7 +25,6 @@
         - "{{ vars_dir }}"
         - "{{ reports_dir }}"
         - "{{ mappings_dir }}"
-        - "{{ ai_reviews_dir }}"
 
 - name: Fetch master_config.xml from Windows
   hosts: windows_servers
@@ -59,7 +57,6 @@
           --out-vars {{ project_dir }}/vars/vars_{{ item | basename | regex_replace('.xml','') }}.yaml
           --out-final {{ project_dir }}/final/{{ item | basename }}
           --out-report {{ project_dir }}/reports/mappings/mapping_report_{{ item | basename | regex_replace('.xml','') }}.txt
-          --ai-review {{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ item | basename | regex_replace('.xml','') }}.txt
       args:
         chdir: "{{ project_dir }}"
       loop: "{{ lookup('fileglob', project_dir + '/files/client_sources/*.xml', wantlist=True) }}"

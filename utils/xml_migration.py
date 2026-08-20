@@ -22,16 +22,6 @@ try:
 except ImportError:
     yaml = None
 
-if TYPE_CHECKING:
-    from sentence_transformers import SentenceTransformer
-
-try:
-    from sentence_transformers import SentenceTransformer, util
-except ImportError:
-    SentenceTransformer = None  # type: ignore[assignment]
-    util = None
-
-_ai_model: Optional["SentenceTransformer"] = None
 
 def safe_text(value: str) -> str:
     return saxutils.escape(value) if value else ""
@@ -71,33 +61,6 @@ def tokenize_term(value: str) -> List[str]:
     return [tok for tok in re.split(r"[^a-z0-9]+", s) if tok]
 
 
-def get_ai_model() -> Optional[SentenceTransformer]:
-    """Lazily load the sentence-transformers model if available."""
-    global _ai_model
-    if SentenceTransformer is None or util is None:
-        return None
-    if _ai_model is None:
-        _ai_model = SentenceTransformer("all-MiniLM-L6-v2")
-    return _ai_model
-
-
-def ai_similarity(a: str, b: str) -> float:
-    """Compute similarity score between two strings using an AI model."""
-    if not a or not b:
-        return 0.0
-
-    model = get_ai_model()
-    if model is None:
-        return 0.0
-
-    emb_a = model.encode(a, convert_to_tensor=True)
-    emb_b = model.encode(b, convert_to_tensor=True)
-    return float(util.cos_sim(emb_a, emb_b))
-
-
-def ai_enabled() -> bool:
-    """Return True if the optional AI similarity feature is available."""
-    return SentenceTransformer is not None and util is not None
 
 
 def score_candidate(ph: Dict[str, Any], v: Dict[str, Any]) -> Tuple[int, str]:
@@ -318,38 +281,6 @@ def write_report(report_lines: List[str], report_path: Path) -> None:
             f.write(line + "\n")
 
 
-def generate_ai_review(placeholders: List[Dict[str, Any]], v1_values: List[Dict[str, Any]], top_n: int = 3) -> List[str]:
-    """Generate an optional AI similarity review for placeholder mappings."""
-    lines: List[str] = []
-    if not ai_enabled():
-        lines.append("AI review unavailable: sentence_transformers is not installed.")
-        return lines
-
-    for ph in placeholders:
-        candidates: List[Tuple[float, Dict[str, Any]]] = []
-        for v in v1_values:
-            sim = ai_similarity(ph["placeholder"], v.get("text", ""))
-            candidates.append((sim, v))
-        candidates.sort(key=lambda item: item[0], reverse=True)
-
-        lines.append(f"Placeholder: {ph['placeholder']} ({ph['location']})")
-        for sim, v in candidates[:top_n]:
-            lines.append(f"  candidate: {v.get('path')} => {v.get('text')} (similarity={sim:.3f})")
-        lines.append("")
-
-    return lines
-
-
-def write_ai_review(review_lines: List[str], review_path: Path) -> None:
-    """Write the AI review report to disk."""
-    review_path.parent.mkdir(parents=True, exist_ok=True)
-    with review_path.open("w", encoding="utf-8") as f:
-        f.write("AI Review Suggestions:\n")
-        f.write("- These suggestions do not affect vars or final output.\n\n")
-        for line in review_lines:
-            f.write(line + "\n")
-
-
 def write_summary_report(
     c_name: str,
     source_xml: Path,
@@ -381,7 +312,7 @@ def write_summary_report(
         f"Vars output: {out_vars}",
         f"Final XML: {out_final}",
         f"Mapping report: {out_report}",
-        f"AI review report: {ai_review}",
+        
     ]
 
     with summary_path.open("w", encoding="utf-8") as f:
@@ -418,14 +349,12 @@ def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_
 
     out_final_path.write_text(rendered, encoding="utf-8")
 
-def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], template_path: Path) -> None:
     """Process migration for a single client against the extracted placeholders and master template."""
     c_name = client["name"]
     source_xml = Path(client.get("source_xml", client["v1_path"]))
     out_vars = Path(client["out_vars"])
     out_final = Path(client["out_final"])
     out_report = Path(client["out_report"])
-    ai_review = Path(client["ai_review"])
     summary_report = Path(client["summary_report"])
 
     print(f"--- Processing Client: {c_name} (Source: {source_xml}) ---")
@@ -436,8 +365,6 @@ def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], t
     write_report(report_lines, out_report)
     render_final_config(template_path, mapping, out_final)
 
-    review_lines = generate_ai_review(placeholders, source_values)
-    write_ai_review(review_lines, ai_review)
     write_summary_report(
         c_name,
         source_xml,
@@ -447,11 +374,10 @@ def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], t
         out_vars,
         out_final,
         out_report,
-        ai_review,
         summary_report,
     )
 
-    print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {ai_review}, {summary_report}")
+    print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {summary_report}")
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Robust XML migration with namespace/CDATA support.")
@@ -461,7 +387,6 @@ def main() -> None:
     parser.add_argument("--out-vars", default="vars/vars_client1.yaml")
     parser.add_argument("--out-final", default="final/client1_config.xml")
     parser.add_argument("--out-report", default="reports/mappings/mapping_report_client1.txt")
-    parser.add_argument("--ai-review", default="reports/ai_reviews/mapping_ai_review_client1.txt")
     parser.add_argument("--summary-report", default="reports/summary/management_summary_client1.txt")
     args = parser.parse_args()
 
@@ -482,7 +407,6 @@ def main() -> None:
         "out_vars": Path(args.out_vars),
         "out_final": Path(args.out_final),
         "out_report": Path(args.out_report),
-        "ai_review": Path(args.ai_review),
         "summary_report": Path(args.summary_report),
     }
     process_client(single_client, placeholders, out_template)
