@@ -66,6 +66,11 @@ def tokenize_term(value: str) -> List[str]:
 
 
 
+def score_candidate(ph: Dict[str, Any], v: Dict[str, Any]) -> Tuple[int, str]:
+    """Score a candidate match for a placeholder."""
+    score = 0
+    reason_parts: List[str] = []
+
     sig = ph["signature"]
     leaf = normalize_term(sig.get("leaf", ""))
     tag = normalize_term(sig.get("tag", ""))
