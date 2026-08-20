@@ -8,6 +8,10 @@
     templates_dir: "{{ project_dir }}/templates"
     final_dir: "{{ project_dir }}/final"
     debug_dir: "{{ project_dir }}/debug"
+    vars_dir: "{{ project_dir }}/vars"
+    reports_dir: "{{ project_dir }}/reports"
+    mappings_dir: "{{ project_dir }}/reports/mappings"
+    ai_reviews_dir: "{{ project_dir }}/reports/ai_reviews"
   tasks:
     - name: Ensure local directories exist
       ansible.builtin.file:
@@ -19,6 +23,10 @@
         - "{{ templates_dir }}"
         - "{{ final_dir }}"
         - "{{ debug_dir }}"
+        - "{{ vars_dir }}"
+        - "{{ reports_dir }}"
+        - "{{ mappings_dir }}"
+        - "{{ ai_reviews_dir }}"
 
 - name: Fetch master_config.xml from Windows
   hosts: windows_servers
