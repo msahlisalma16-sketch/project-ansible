@@ -124,7 +124,7 @@
         dest: "{{ debug_dir }}/debug_parser.log"
 
 - name: Copy final configs to Windows
-  hosts: windows
+  hosts: windows_servers
   gather_facts: no
   vars:
     final_dir: "/var/lib/jenkins/workspace/ansible-pipeline/final"
