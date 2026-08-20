@@ -72,6 +72,7 @@ pipeline {
     post {
         success {
             archiveArtifacts artifacts: 'final/**, reports/**, vars/**, debug/**', fingerprint: true
+            archiveArtifacts artifacts: 'reports/ai_reviews/*.txt', exclude: '**/*unavailable*.txt'
         }
         failure {
             echo 'Pipeline failed — configs not deployed.'
