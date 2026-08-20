@@ -23,6 +23,8 @@ except ImportError:
     yaml = None
 
 
+
+
 def safe_text(value: str) -> str:
     return saxutils.escape(value) if value else ""
 
@@ -63,10 +65,6 @@ def tokenize_term(value: str) -> List[str]:
 
 
 
-def score_candidate(ph: Dict[str, Any], v: Dict[str, Any]) -> Tuple[int, str]:
-    """Score a candidate match for a placeholder."""
-    score = 0
-    reason_parts: List[str] = []
 
     sig = ph["signature"]
     leaf = normalize_term(sig.get("leaf", ""))
@@ -281,6 +279,11 @@ def write_report(report_lines: List[str], report_path: Path) -> None:
             f.write(line + "\n")
 
 
+
+
+
+
+
 def write_summary_report(
     c_name: str,
     source_xml: Path,
@@ -290,7 +293,6 @@ def write_summary_report(
     out_vars: Path,
     out_final: Path,
     out_report: Path,
-    ai_review: Path,
     summary_path: Path,
 ) -> None:
     """Write a concise management summary for one client migration."""
@@ -312,7 +314,6 @@ def write_summary_report(
         f"Vars output: {out_vars}",
         f"Final XML: {out_final}",
         f"Mapping report: {out_report}",
-        
     ]
 
     with summary_path.open("w", encoding="utf-8") as f:
@@ -349,6 +350,7 @@ def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_
 
     out_final_path.write_text(rendered, encoding="utf-8")
 
+def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], template_path: Path) -> None:
     """Process migration for a single client against the extracted placeholders and master template."""
     c_name = client["name"]
     source_xml = Path(client.get("source_xml", client["v1_path"]))
@@ -365,6 +367,7 @@ def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_
     write_report(report_lines, out_report)
     render_final_config(template_path, mapping, out_final)
 
+    review_lines = generate_ai_review(placeholders, source_values)
     write_summary_report(
         c_name,
         source_xml,
@@ -374,10 +377,11 @@ def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_
         out_vars,
         out_final,
         out_report,
+        ai_review,
         summary_report,
     )
 
-    print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {summary_report}")
+    print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {ai_review}, {summary_report}")
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Robust XML migration with namespace/CDATA support.")
