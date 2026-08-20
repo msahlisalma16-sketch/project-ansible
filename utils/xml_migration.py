@@ -384,7 +384,7 @@ def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], t
         summary_report,
     )
 
-    print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {ai_review}, {summary_report}")
+    print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {summary_report}")
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Robust XML migration with namespace/CDATA support.")
