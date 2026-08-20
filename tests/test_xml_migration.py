@@ -53,7 +53,6 @@ class TestXmlMigration(unittest.TestCase):
                 out_vars=Path("vars/vars_client1.yaml"),
                 out_final=Path("final/client1_config.xml"),
                 out_report=Path("reports/mappings/mapping_report_client1.txt"),
-                ai_review=Path("reports/ai_reviews/mapping_ai_review_client1.txt"),
                 summary_path=summary_path,
             )
 
