@@ -35,6 +35,3 @@ This project is an automated XML migration pipeline built with Jenkins and Ansib
 - The pipeline should be able to handle multiple Windows hosts if the inventory contains more than one.
 - Tests and debug scripts are part of the workflow so the generated artifacts can be verified before copying them back to Windows.
 
-## Short Explanation For a Supervisor
-
-This project automates XML migration from a Windows-supplied master template and local client XML sources. It generates per-client outputs on the control node, validates the results, and then copies the finished XML files back to the Windows machines.
