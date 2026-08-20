@@ -1,5 +1,10 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'python:3.14'
+            args '-u root:root'
+        }
+    }
     options {
         skipDefaultCheckout()
     }
@@ -33,7 +38,6 @@ pipeline {
                   python3 -m venv .venv
                   . .venv/bin/activate
                   pip install --upgrade pip
-                  pip install torch==2.13.0+cpu --index-url https://download.pytorch.org/whl/cpu
                   pip install -r requirements.txt
                 '''
             }
@@ -68,17 +72,24 @@ pipeline {
             }
         }
     }
-
+        stage('Secure Artifacts') {
+            steps {
+                sh '''
+                  chmod 600 vars/*.yaml || true
+                '''
+            }
+        }
+    }
     post {
         success {
              archiveArtifacts artifacts: 'final/**, reports/**, vars/**, debug/**', fingerprint: true
-             archiveArtifacts artifacts: 'reports/ai_reviews/*.txt', excludes: '**/*unavailable*.txt'
 
         }
         failure {
             echo 'Pipeline failed — configs not deployed.'
         }
         always {
+            sh 'rm -f "$VAULT_PASSWORD_FILE"'
             archiveArtifacts artifacts: 'reports/**', fingerprint: true
         }
     }
