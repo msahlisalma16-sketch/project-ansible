@@ -372,7 +372,6 @@ def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], t
     write_report(report_lines, out_report)
     render_final_config(template_path, mapping, out_final)
 
-    review_lines = generate_ai_review(placeholders, source_values)
     write_summary_report(
         c_name,
         source_xml,
@@ -382,7 +381,6 @@ def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], t
         out_vars,
         out_final,
         out_report,
-        ai_review,
         summary_report,
     )
 
