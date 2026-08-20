@@ -1,111 +1,61 @@
-- name: Ensure local directories exist
+- name: Prepare local directories
   hosts: localhost
   gather_facts: false
   vars:
     project_dir: "{{ playbook_dir }}/.."
     files_dir: "{{ project_dir }}/files"
+    master_templates_dir: "{{ project_dir }}/files/master_templates"
     templates_dir: "{{ project_dir }}/templates"
     final_dir: "{{ project_dir }}/final"
     debug_dir: "{{ project_dir }}/debug"
   tasks:
-    - name: Create required directories
+    - name: Ensure local directories exist
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
       loop:
         - "{{ files_dir }}"
+        - "{{ master_templates_dir }}"
         - "{{ templates_dir }}"
         - "{{ final_dir }}"
         - "{{ debug_dir }}"
 
-
-- name: Fetch placeholder configs from Windows servers
+- name: Fetch master_config.xml from Windows
   hosts: windows_servers
   gather_facts: false
+  vars:
+    project_dir: "{{ playbook_dir }}/.."
+    remote_master_path: "C:\\Users\\vboxuser\\Desktop\\project\\master_config.xml"
+    local_master_dir: "{{ project_dir }}/files/master_templates"
   tasks:
-    - name: Find XML files in project folder
-      win_find:
-        paths: C:\Users\vboxuser\Desktop\project
-        patterns: '*.xml'
-      register: xml_files
-
-    - name: Fetch each XML file
-      fetch:
-        src: "{{ item.path }}"
-        dest: "{{ playbook_dir }}/../files/master_templates/{{ inventory_hostname }}/"
+    - name: Fetch master_config.xml from Windows target
+      ansible.builtin.fetch:
+        src: "{{ remote_master_path }}"
+        dest: "{{ local_master_dir }}/"
         flat: yes
-      loop: "{{ xml_files.files }}"
-      loop_control:
-        label: "{{ item.path }}"
 
-- name: Generate configs for each server
+
+- name: Generate XML migration artifacts
   hosts: localhost
   gather_facts: false
   vars:
     project_dir: "{{ playbook_dir }}/.."
     python_executable: python3
   tasks:
-    - name: Run migration script for each client source XML
+    - name: Process all incoming XMLs
       ansible.builtin.command:
-        argv:
-          - "{{ python_executable }}"
-          - "{{ item }}"   # source XML with values (from client_sources)
-          - "{{ project_dir }}/files/master_templates/{{ inventory_hostname }}/master_config.xml"  # master template with placeholders
-          - --out-template
-          - "{{ project_dir }}/templates/config_target.j2"
-          - --out-vars
-          - "{{ project_dir }}/vars/vars_{{ item | basename | regex_replace('.xml','') }}.yaml"
-          - --out-final
-          - "{{ project_dir }}/final/{{ inventory_hostname }}_{{ item | basename }}"
-          - --out-report
-          - "{{ project_dir }}/reports/mappings/mapping_report_{{ inventory_hostname }}_{{ item | basename | regex_replace('.xml','') }}.txt"
-          - --ai-review
-          - "{{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ inventory_hostname }}_{{ item | basename | regex_replace('.xml','') }}.txt"
+        cmd: >-
+          {{ python_executable }} {{ project_dir }}/utils/xml_migration.py {{ item }}
+          {{ project_dir }}/files/master_templates/master_config.xml
+          --out-template {{ project_dir }}/templates/config_target.j2
+          --out-vars {{ project_dir }}/vars/vars_{{ item | basename | regex_replace('.xml','') }}.yaml
+          --out-final {{ project_dir }}/final/{{ item | basename }}
+          --out-report {{ project_dir }}/reports/mappings/mapping_report_{{ item | basename | regex_replace('.xml','') }}.txt
+          --ai-review {{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ item | basename | regex_replace('.xml','') }}.txt
       args:
         chdir: "{{ project_dir }}"
       loop: "{{ lookup('fileglob', project_dir + '/files/client_sources/*.xml', wantlist=True) }}"
-      loop_control:
-        label: "{{ item }}"
       changed_when: false
-
-- name: Render final XML
-  hosts: localhost
-  gather_facts: false
-  vars:
-    project_dir: "{{ playbook_dir }}/.."
-    render_template_path: "{{ project_dir }}/templates/config_target.j2"
-
-- name: Generate configs for each server
-  hosts: localhost
-  gather_facts: false
-  vars:
-    project_dir: "{{ playbook_dir }}/.."
-    python_executable: python3
-    output_xml_path: "{{ project_dir }}/final/final_config.xml"
-  tasks:
-    - name: Run migration script for each server’s XMLs
-      ansible.builtin.command:
-        argv:
-          - "{{ python_executable }}"
-          - "{{ item.path }}"
-          - "{{ project_dir }}/files/master_templates/{{ item.invocation.module_args._ansible_host }}/master_config.xml"
-          - --out-template
-          - "{{ project_dir }}/templates/config_target.j2"
-          - --out-vars
-          - "{{ project_dir }}/vars/vars_{{ item.path | basename | regex_replace('.xml','') }}.yaml"
-          - --out-final
-          - "{{ project_dir }}/final/{{ item.invocation.module_args._ansible_host }}_{{ item.path | basename }}"
-          - --out-report
-          - "{{ project_dir }}/reports/mappings/mapping_report_{{ item.invocation.module_args._ansible_host }}_{{ item.path | basename | regex_replace('.xml','') }}.txt"
-          - --ai-review
-          - "{{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ item.invocation.module_args._ansible_host }}_{{ item.path | basename | regex_replace('.xml','') }}.txt"
-      args:
-        chdir: "{{ project_dir }}"
-      loop: "{{ hostvars | dict2items | selectattr('value.xml_files', 'defined') | map(attribute='value.xml_files.files') | flatten }}"
-      loop_control:
-        label: "{{ item.path }}"
-      changed_when: false
-
 
 - name: Run tests and debug scripts
   hosts: localhost
@@ -113,7 +63,7 @@
   vars:
     project_dir: "{{ playbook_dir }}/.."
     debug_dir: "{{ project_dir }}/debug"
-    python_executable: "{{ lookup('env','HOME') }}/venvs/migration/bin/python3"
+    python_executable: python3
   tasks:
     - name: Run score_probe.py
       ansible.builtin.command:
@@ -185,12 +135,3 @@
         dest: "C:\\Users\\vboxuser\\Desktop\\project\\{{ item | basename }}"
       with_fileglob:
         - "{{ final_dir }}/*.xml"
-- name: Deploy final configs to Windows servers
-  hosts: windows_servers
-  tasks:
-    - name: Copy final config back to server
-      win_copy:
-        src: "{{ playbook_dir }}/../final/{{ inventory_hostname }}_config.xml"
-        dest: C:\project\final_config.xml
-
- 

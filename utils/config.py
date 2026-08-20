@@ -17,6 +17,7 @@ DEFAULT_CONFIG: Dict[str, str] = {
     "out_final": "final/final_config.xml",
     "out_report": "reports/mappings/mapping_report.txt",
     "ai_review": "reports/ai_reviews/mapping_ai_review.txt",
+    "summary_report": "reports/summary/management_summary.txt",
 }
 
 
@@ -47,6 +48,7 @@ def load_config() -> Dict[str, Any]:
         "OUT_FINAL": "out_final",
         "OUT_REPORT": "out_report",
         "AI_REVIEW": "ai_review",
+        "SUMMARY_REPORT": "summary_report",
     }
     for env_var, cfg_key in env_mapping.items():
         if env_var in os.environ:
@@ -68,6 +70,7 @@ OUT_VARS = Path(_config.get("out_vars", DEFAULT_CONFIG["out_vars"]))
 OUT_FINAL = Path(_config.get("out_final", DEFAULT_CONFIG["out_final"]))
 OUT_REPORT = Path(_config.get("out_report", DEFAULT_CONFIG["out_report"]))
 AI_REVIEW = Path(_config.get("ai_review", DEFAULT_CONFIG["ai_review"]))
+SUMMARY_REPORT = Path(_config.get("summary_report", DEFAULT_CONFIG["summary_report"]))
 
 
 def get_clients() -> List[Dict[str, Any]]:
@@ -87,6 +90,7 @@ def get_clients() -> List[Dict[str, Any]]:
                     "out_final": Path(item.get("out_final", f"final/{c_name}_config.xml")),
                     "out_report": Path(item.get("out_report", f"reports/mappings/mapping_report_{c_name}.txt")),
                     "ai_review": Path(item.get("ai_review", f"reports/ai_reviews/mapping_ai_review_{c_name}.txt")),
+                    "summary_report": Path(item.get("summary_report", f"reports/summary/management_summary_{c_name}.txt")),
                 })
         if clients:
             return clients
@@ -99,12 +103,13 @@ def get_clients() -> List[Dict[str, Any]]:
         "out_final": OUT_FINAL,
         "out_report": OUT_REPORT,
         "ai_review": AI_REVIEW,
+        "summary_report": SUMMARY_REPORT,
     }]
 
 
 def reload_config() -> Dict[str, Any]:
     """Reload configuration dynamically."""
-    global _config, MASTER_TEMPLATE_PATH, V5_PATH, SOURCE_XML_PATH, V1_PATH, OUT_TEMPLATE, OUT_VARS, OUT_FINAL, OUT_REPORT, AI_REVIEW
+    global _config, MASTER_TEMPLATE_PATH, V5_PATH, SOURCE_XML_PATH, V1_PATH, OUT_TEMPLATE, OUT_VARS, OUT_FINAL, OUT_REPORT, AI_REVIEW, SUMMARY_REPORT
     _config = load_config()
     MASTER_TEMPLATE_PATH = Path(_config.get("master_template_path", _config.get("v5_path", DEFAULT_CONFIG["master_template_path"])))
     V5_PATH = MASTER_TEMPLATE_PATH
@@ -115,4 +120,5 @@ def reload_config() -> Dict[str, Any]:
     OUT_FINAL = Path(_config.get("out_final", DEFAULT_CONFIG["out_final"]))
     OUT_REPORT = Path(_config.get("out_report", DEFAULT_CONFIG["out_report"]))
     AI_REVIEW = Path(_config.get("ai_review", DEFAULT_CONFIG["ai_review"]))
+    SUMMARY_REPORT = Path(_config.get("summary_report", DEFAULT_CONFIG["summary_report"]))
     return _config
