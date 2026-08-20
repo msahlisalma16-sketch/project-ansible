@@ -71,7 +71,7 @@ pipeline {
                 '''
             }
         }
-    }
+
         stage('Secure Artifacts') {
             steps {
                 sh '''
@@ -80,10 +80,10 @@ pipeline {
             }
         }
     }
+
     post {
         success {
-             archiveArtifacts artifacts: 'final/**, reports/**, vars/**, debug/**', fingerprint: true
-
+            archiveArtifacts artifacts: 'final/**, reports/**, vars/**, debug/**', fingerprint: true
         }
         failure {
             echo 'Pipeline failed — configs not deployed.'
