@@ -348,6 +348,44 @@ def write_ai_review(review_lines: List[str], review_path: Path) -> None:
         f.write("- These suggestions do not affect vars or final output.\n\n")
         for line in review_lines:
             f.write(line + "\n")
+
+
+def write_summary_report(
+    c_name: str,
+    source_xml: Path,
+    master_template_path: Path,
+    placeholders: List[Dict[str, Any]],
+    mapping: Dict[str, Any],
+    out_vars: Path,
+    out_final: Path,
+    out_report: Path,
+    ai_review: Path,
+    summary_path: Path,
+) -> None:
+    """Write a concise management summary for one client migration."""
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
+    total_placeholders = len(placeholders)
+    matched_placeholders = len(mapping)
+    unmapped_placeholders = total_placeholders - matched_placeholders
+    match_rate = (matched_placeholders / total_placeholders * 100.0) if total_placeholders else 0.0
+
+    lines = [
+        "MANAGEMENT SUMMARY",
+        f"Client: {c_name}",
+        f"Source XML: {source_xml}",
+        f"Master template: {master_template_path}",
+        f"Placeholders found: {total_placeholders}",
+        f"Placeholders matched: {matched_placeholders}",
+        f"Placeholders unmapped: {unmapped_placeholders}",
+        f"Match rate: {match_rate:.1f}%",
+        f"Vars output: {out_vars}",
+        f"Final XML: {out_final}",
+        f"Mapping report: {out_report}",
+        f"AI review report: {ai_review}",
+    ]
+
+    with summary_path.open("w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
 def render_final_config(template_path: Path, mapping: Dict[str, Any], out_final_path: Path) -> None:
     """Render the Jinja2 template with mapped variables to produce the final XML file with filled placeholders."""
     if not template_path.exists():
@@ -388,6 +426,7 @@ def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], t
     out_final = Path(client["out_final"])
     out_report = Path(client["out_report"])
     ai_review = Path(client["ai_review"])
+    summary_report = Path(client["summary_report"])
 
     print(f"--- Processing Client: {c_name} (Source: {source_xml}) ---")
     source_values = parse_v1(source_xml)
@@ -399,8 +438,20 @@ def process_client(client: Dict[str, Any], placeholders: List[Dict[str, Any]], t
 
     review_lines = generate_ai_review(placeholders, source_values)
     write_ai_review(review_lines, ai_review)
+    write_summary_report(
+        c_name,
+        source_xml,
+        template_path,
+        placeholders,
+        mapping,
+        out_vars,
+        out_final,
+        out_report,
+        ai_review,
+        summary_report,
+    )
 
-    print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {ai_review}")
+    print(f"[{c_name}] Generated: {out_vars}, {out_final}, {out_report}, {ai_review}, {summary_report}")
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Robust XML migration with namespace/CDATA support.")
@@ -411,6 +462,7 @@ def main() -> None:
     parser.add_argument("--out-final", default="final/client1_config.xml")
     parser.add_argument("--out-report", default="reports/mappings/mapping_report_client1.txt")
     parser.add_argument("--ai-review", default="reports/ai_reviews/mapping_ai_review_client1.txt")
+    parser.add_argument("--summary-report", default="reports/summary/management_summary_client1.txt")
     args = parser.parse_args()
 
     # Master template path
@@ -431,6 +483,7 @@ def main() -> None:
         "out_final": Path(args.out_final),
         "out_report": Path(args.out_report),
         "ai_review": Path(args.ai_review),
+        "summary_report": Path(args.summary_report),
     }
     process_client(single_client, placeholders, out_template)
 

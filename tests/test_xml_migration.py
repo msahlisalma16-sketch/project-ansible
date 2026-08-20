@@ -41,6 +41,28 @@ class TestXmlMigration(unittest.TestCase):
             self.assertIn("hostname", contents)
             self.assertIn("port", contents)
 
+    def test_write_summary_report(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            summary_path = Path(temp_dir) / "summary.txt"
+            m.write_summary_report(
+                c_name="client1",
+                source_xml=Path("files/client_sources/client1_source.xml"),
+                master_template_path=Path("files/master_templates/master_config.xml"),
+                placeholders=[{"placeholder": "system.hostname"}],
+                mapping={"system.hostname": "example"},
+                out_vars=Path("vars/vars_client1.yaml"),
+                out_final=Path("final/client1_config.xml"),
+                out_report=Path("reports/mappings/mapping_report_client1.txt"),
+                ai_review=Path("reports/ai_reviews/mapping_ai_review_client1.txt"),
+                summary_path=summary_path,
+            )
+
+            self.assertTrue(summary_path.exists())
+            contents = summary_path.read_text(encoding="utf-8")
+            self.assertIn("MANAGEMENT SUMMARY", contents)
+            self.assertIn("Placeholders found: 1", contents)
+            self.assertIn("Match rate: 100.0%", contents)
+
     def test_config_defaults_and_env_override(self):
         self.assertIsNotNone(config.SOURCE_XML_PATH)
         self.assertIsNotNone(config.MASTER_TEMPLATE_PATH)
