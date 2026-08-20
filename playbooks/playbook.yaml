@@ -4,6 +4,7 @@
   vars:
     project_dir: "{{ playbook_dir }}/.."
     files_dir: "{{ project_dir }}/files"
+    master_templates_dir: "{{ project_dir }}/files/master_templates"
     templates_dir: "{{ project_dir }}/templates"
     final_dir: "{{ project_dir }}/final"
     debug_dir: "{{ project_dir }}/debug"
@@ -14,32 +15,23 @@
         state: directory
       loop:
         - "{{ files_dir }}"
+        - "{{ master_templates_dir }}"
         - "{{ templates_dir }}"
         - "{{ final_dir }}"
         - "{{ debug_dir }}"
 
 - name: Fetch master_config.xml from Windows
-  hosts: beta
+  hosts: windows_servers
   gather_facts: false
   vars:
     project_dir: "{{ playbook_dir }}/.."
-    remote_master_path: "C:\\Users\\user\\Desktop\\project\\master_config.xml"
-    local_master_path: "{{ project_dir }}/files/master_templates/master_config.xml"
+    remote_master_path: "C:\\Users\\vboxuser\\Desktop\\project\\master_config.xml"
+    local_master_dir: "{{ project_dir }}/files/master_templates"
   tasks:
     - name: Fetch master_config.xml from Windows target
       ansible.builtin.fetch:
         src: "{{ remote_master_path }}"
-        dest: "{{ local_master_path }}"
-
-- name: Collect XMLs from all Windows servers
-  hosts: windows_servers
-  tasks:
-    - name: Fetch XML files
-      fetch:
-        src: C:\configs\*.xml
-        dest: "{{ playbook_dir }}/../files/client_sources/"
-        flat: yes
-
+        dest: "{{ local_master_dir }}/"
         flat: yes
 
 
@@ -52,34 +44,18 @@
   tasks:
     - name: Process all incoming XMLs
       ansible.builtin.command:
-        argv:
-          - "{{ python_executable }}"
-          - "{{ project_dir }}/utils/xml_migration.py"
-          - "{{ item }}"
-          - "{{ project_dir }}/files/master_templates/master_config.xml"
-          - --out-template
-          - "{{ project_dir }}/templates/config_target.j2"
-          - --out-vars
-          - "{{ project_dir }}/vars/vars_{{ item | basename | regex_replace('.xml','') }}.yaml"
-          - --out-final
-          - "{{ project_dir }}/final/{{ item | basename }}"
-          - --out-report
-          - "{{ project_dir }}/reports/mappings/mapping_report_{{ item | basename | regex_replace('.xml','') }}.txt"
-          - --ai-review
-          - "{{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ item | basename | regex_replace('.xml','') }}.txt"
+        cmd: >-
+          {{ python_executable }} {{ project_dir }}/utils/xml_migration.py {{ item }}
+          {{ project_dir }}/files/master_templates/master_config.xml
+          --out-template {{ project_dir }}/templates/config_target.j2
+          --out-vars {{ project_dir }}/vars/vars_{{ item | basename | regex_replace('.xml','') }}.yaml
+          --out-final {{ project_dir }}/final/{{ item | basename }}
+          --out-report {{ project_dir }}/reports/mappings/mapping_report_{{ item | basename | regex_replace('.xml','') }}.txt
+          --ai-review {{ project_dir }}/reports/ai_reviews/mapping_ai_review_{{ item | basename | regex_replace('.xml','') }}.txt
       args:
         chdir: "{{ project_dir }}"
       loop: "{{ lookup('fileglob', project_dir + '/files/client_sources/*.xml', wantlist=True) }}"
       changed_when: false
-
-- name: Render final XML
-  hosts: localhost
-  gather_facts: false
-  vars:
-    project_dir: "{{ playbook_dir }}/.."
-    render_template_path: "{{ project_dir }}/templates/config_target.j2"
-    output_xml_path: "{{ project_dir }}/final/final_config.xml"
-
 
 - name: Run tests and debug scripts
   hosts: localhost
@@ -87,7 +63,7 @@
   vars:
     project_dir: "{{ playbook_dir }}/.."
     debug_dir: "{{ project_dir }}/debug"
-    python_executable: "{{ lookup('env','HOME') }}/venvs/migration/bin/python3"
+    python_executable: python3
   tasks:
     - name: Run score_probe.py
       ansible.builtin.command:
