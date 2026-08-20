@@ -1,9 +1,10 @@
 pipeline {
     agent any
-    }
+
     options {
         skipDefaultCheckout()
     }
+
     parameters {
         string(name: 'INVENTORY', defaultValue: 'inventory.ini', description: 'Ansible inventory file')
         string(name: 'VAULT_CREDENTIAL_ID', defaultValue: 'VAULT_PASS_FILE', description: 'Jenkins credential ID for the Ansible vault password file')
