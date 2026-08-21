@@ -1,76 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<enterpriseConfig version="1">
+<enterpriseConfiguration>
 
     <!-- Authentication -->
-    <Authentication>
-        <Provider type="OIDC"/>
-        <Client>
-            <Id>corp-client-999</Id>
-            <Secret>SecureKey!2026</Secret>
-        </Client>
-        <Token>
-            <Endpoint>https://auth.globalcorp.net/oauth/token</Endpoint>
-        </Token>
-    </Authentication>
+    <component name="AuthSystem">
+        <parameters>
+            <provider>OAuth2</provider>
+            <clientId>client9-app</clientId>
+            <clientSecret>SecretKey9!@#</clientSecret>
+            <tokenEndpoint>https://auth.client9.example.com/token</tokenEndpoint>
+            <refreshInterval>3600</refreshInterval>
+        </parameters>
+    </component>
 
     <!-- Notification Service -->
-    <Notifications>
-        <SMTP>
-            <Host>smtp.globalcorp.net</Host>
-            <Port>2525</Port>
-            <TLS>true</TLS>
-        </SMTP>
-        <Sender>
-            <Email>alerts@globalcorp.net</Email>
-            <Name>GlobalCorp Alerts</Name>
-        </Sender>
-        <Channels>
-            <ErrorQueue>system-errors</ErrorQueue>
-            <InfoQueue>system-info</InfoQueue>
-            <WarningQueue>system-warnings</WarningQueue>
-        </Channels>
-    </Notifications>
+    <component name="NotificationService">
+        <parameters>
+            <smtpHost>smtp.client9.example.com</smtpHost>
+            <smtpPort>465</smtpPort>
+            <senderEmail>alerts@client9.example.com</senderEmail>
+            <errorChannel>error-channel9</errorChannel>
+            <infoChannel>info-channel9</infoChannel>
+            <warningChannel>warn-channel9</warningChannel>
+        </parameters>
+    </component>
 
     <!-- Monitoring -->
-    <Monitoring>
-        <Metrics>
-            <Url>https://metrics.globalcorp.net/v1</Url>
-            <Interval>30s</Interval>
-        </Metrics>
-        <Alert>
-            <Threshold>75%</Threshold>
-            <Email>ops-team@globalcorp.net</Email>
-        </Alert>
-        <Dashboard>
-            <Url>https://dashboard.globalcorp.net</Url>
-            <Theme>dark</Theme>
-        </Dashboard>
-    </Monitoring>
+    <component name="MonitoringSystem">
+        <parameters>
+            <metricsEndpoint>https://monitor.client9.example.com/metrics</metricsEndpoint>
+            <alertThreshold>80%</alertThreshold>
+            <dashboardUrl>https://monitor.client9.example.com/dashboard</dashboardUrl>
+            <logRetentionDays>30</logRetentionDays>
+        </parameters>
+    </component>
 
     <!-- File Management -->
-    <FileSystem>
-        <UploadDir>/srv/global/uploads</UploadDir>
-        <BackupDir>/srv/global/backups</BackupDir>
-        <TempDir>/srv/global/tmp</TempDir>
-        <LogsDir>/srv/global/logs</LogsDir>
-    </FileSystem>
+    <component name="FileManager">
+        <parameters>
+            <uploadDir>/mnt/client9/uploads</uploadDir>
+            <backupDir>/mnt/client9/backups</backupDir>
+            <tempDir>/mnt/client9/tmp</tempDir>
+            <archiveDir>/mnt/client9/archive</archiveDir>
+        </parameters>
+    </component>
 
     <!-- External API -->
-    <ExternalAPI>
-        <Service>
-            <Url>https://partnerapi.globalcorp.net/v3</Url>
-            <ApiKey>PARTNER-KEY-2026-XYZ</ApiKey>
-            <Retry>4</Retry>
-            <Timeout>10000</Timeout>
-        </Service>
-    </ExternalAPI>
+    <component name="ExternalConnector">
+        <parameters>
+            <serviceUrl>https://api.client9.external.com</serviceUrl>
+            <apiKey>APIKEY-CLIENT9-XYZ</apiKey>
+            <retryCount>5</retryCount>
+            <timeout>60</timeout>
+        </parameters>
+    </component>
 
     <!-- Cache -->
-    <Cache>
-        <Directory>/srv/global/cache</Directory>
-        <MaxSize>2GB</MaxSize>
-        <EvictionPolicy>LFU</EvictionPolicy>
-        <Compression>true</Compression>
-    </Cache>
+    <component name="CacheSystem">
+        <parameters>
+            <cacheDir>/mnt/client9/cache</cacheDir>
+            <maxSize>1GB</maxSize>
+            <evictionPolicy>FIFO</evictionPolicy>
+            <compressionEnabled>true</compressionEnabled>
+        </parameters>
+    </component>
 
-</enterpriseConfig>
+    <!-- Security -->
+    <component name="SecuritySystem">
+        <parameters>
+            <firewallEnabled>true</firewallEnabled>
+            <allowedIPs>192.168.1.0/24</allowedIPs>
+            <encryptionAlgorithm>AES256</encryptionAlgorithm>
+        </parameters>
+    </component>
+
+    <!-- Analytics -->
+    <component name="AnalyticsService">
+        <parameters>
+            <trackingId>UA-CLIENT9-001</trackingId>
+            <reportingEndpoint>https://analytics.client9.example.com/report</reportingEndpoint>
+            <samplingRate>0.75</samplingRate>
+        </parameters>
+    </component>
+
+</enterpriseConfiguration>
