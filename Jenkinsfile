@@ -2,7 +2,14 @@ pipeline {
     agent any
 
     options {
-        skipDefaultCheckout()
+        cleanWs()                        // wipes workspace before each run
+        skipDefaultCheckout()            // prevents automatic SCM checkout
+        buildDiscarder(
+            logRotator(
+                numToKeepStr: '1',      // keep only last 10 builds
+
+            )
+        )
     }
 
     parameters {
