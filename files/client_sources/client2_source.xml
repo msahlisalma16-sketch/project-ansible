@@ -1,67 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<enterpriseConfig version="1">
+<?xml-stylesheet type="text/xsl" href="style.xsl"?>
+<!-- Universal XML stress test -->
 
-    <!-- Authentication -->
-    <Authentication>
-        <Provider type="SAML2"/>
-        <Client>
-            <Id>corp-client-2026</Id>
-            <Secret>UltraSecureKey789</Secret>
-        </Client>
-        <Token>
-            <Endpoint>https://login.corpcloud.net/sso/token</Endpoint>
-        </Token>
-    </Authentication>
+<!DOCTYPE enterpriseConfiguration [
+  <!ENTITY company "TestCorp">
+]>
 
-    <!-- Notification Service -->
-    <Notifications>
-        <SMTP>
-            <Host>smtp.corpcloud.net</Host>
-            <Port>465</Port>
-        </SMTP>
-        <Sender>
-            <Email>system@corpcloud.net</Email>
-        </Sender>
-        <Channels>
-            <ErrorQueue>critical-alerts</ErrorQueue>
-            <InfoQueue>general-updates</InfoQueue>
-        </Channels>
-    </Notifications>
+<enterpriseConfiguration xmlns:ns="http://example.com/schema">
+  <!-- Attributes -->
+  <component name="Modules">
+    <parameters>
+      <Database name="hrMain" user="hrUser" password="hrPass" dsn="jdbc:oracle:thin:@hrdb.test.net:1521/HR"/>
+      <Database name="finMain" user="finUser" password="finPass" dsn="jdbc:oracle:thin:@findb.test.net:1521/FIN"/>
+    </parameters>
+  </component>
 
-    <!-- Monitoring -->
-    <Monitoring>
-        <Metrics>
-            <Url>https://metrics.corpcloud.net/api</Url>
-        </Metrics>
-        <Alert>
-            <Threshold>90%</Threshold>
-        </Alert>
-        <Dashboard>
-            <Url>https://dashboard.corpcloud.net</Url>
-        </Dashboard>
-    </Monitoring>
+  <!-- Nested tags -->
+  <component name="MessagingSystem">
+    <parameters>
+      <serverHost>msg.test.net</serverHost>
+      <serverPort>61616</serverPort>
+      <adminUser>adminTest</adminUser>
+      <adminPassword>adminPassTest</adminPassword>
+      <queues>
+        <queue name="HRQueue">HRQueueTest</queue>
+        <queue name="FinanceQueue">FinanceQueueTest</queue>
+      </queues>
+      <topics>
+        <topic name="AuditTopic">AuditTopicTest</topic>
+      </topics>
+    </parameters>
+  </component>
 
-    <!-- File Management -->
-    <FileSystem>
-        <UploadDir>/data/uploads</UploadDir>
-        <BackupDir>/data/backups</BackupDir>
-        <TempDir>/data/tmp</TempDir>
-    </FileSystem>
+  <!-- CDATA + entity -->
+  <component name="Logger">
+    <parameters>
+      <logLevel><![CDATA[INFO & DEBUG]]></logLevel>
+      <logFormat>%d %c %m%n</logFormat>
+      <logFile>/var/log/test/app.log</logFile>
+      <logArchive>/var/log/test/archive</logArchive>
+      <companyName>&company;</companyName>
+    </parameters>
+  </component>
 
-    <!-- External API -->
-    <ExternalAPI>
-        <Service>
-            <Url>https://partnerapi.corpcloud.net/v2</Url>
-            <ApiKey>PARTNER-KEY-456XYZ</ApiKey>
-            <Retry>5</Retry>
-        </Service>
-    </ExternalAPI>
+  <!-- Self-closing + optional -->
+  <component name="ResourceSet">
+    <parameters>
+      <baseDir>/srv/test</baseDir>
+      <scriptsDir>/srv/test/resources/scripts</scriptsDir>
+      <reportsDir>/srv/test/resources/reports</reportsDir>
+      <optionalDir/>
+    </parameters>
+  </component>
 
-    <!-- Cache -->
-    <Cache>
-        <Directory>/data/cache</Directory>
-        <MaxSize>1GB</MaxSize>
-        <EvictionPolicy>FIFO</EvictionPolicy>
-    </Cache>
+  <!-- Namespaces + attributes -->
+  <ns:component name="ServiceGateway">
+    <ns:parameters>
+      <ns:endpointUrl protocol="https">https://api.test.net/v5</ns:endpointUrl>
+      <ns:authToken>testToken123</ns:authToken>
+      <ns:timeout unit="ms">15000</ns:timeout>
+    </ns:parameters>
+  </ns:component>
 
-</enterpriseConfig>
+  <!-- Multiple storage backends -->
+  <component name="StorageSystem">
+    <parameters>
+      <localPath>/srv/test/storage</localPath>
+      <ftp>
+        <host>ftp.test.net</host>
+        <port>2121</port>
+        <user>ftpTest</user>
+        <password>ftpPassTest</password>
+      </ftp>
+      <s3>
+        <bucket>test-bucket</bucket>
+        <region>us-east-1</region>
+        <accessKey>AKIA_TEST</accessKey>
+        <secretKey>SECRET_TEST</secretKey>
+      </s3>
+    </parameters>
+  </component>
+
+  <!-- Mixed content -->
+  <component name="Notes">
+    <parameters>
+      <note>Remember to <bold>encrypt</bold> passwords</note>
+    </parameters>
+  </component>
+
+  <!-- Unknown component -->
+  <component name="Analytics">
+    <parameters>
+      <enabled>true</enabled>
+      <engine>spark</engine>
+      <nodes>
+        <node id="1">analytics01.test.net</node>
+        <node id="2">analytics02.test.net</node>
+      </nodes>
+    </parameters>
+  </component>
+</enterpriseConfiguration>
