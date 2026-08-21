@@ -22,7 +22,7 @@ pipeline {
             steps {
                 sh '''
                   set -e
-                  $ANSIBLE_CMD --version
+                  ${params.ANSIBLE_CMD} --version
                   python3 --version
                 '''
             }
