@@ -1,0 +1,28 @@
+<configuration>
+  <connectionStrings>
+    <add name="MainDB" connectionString="Server=CLIENT5-SQL;Database=MainDB;User Id=user5;Password=pass5;" />
+    <add name="AnalyticsDB" connectionString="Server=CLIENT5-SQL;Database=Analytics;User Id=ana5;Password=ana5pass;" />
+  </connectionStrings>
+
+  <appSettings>
+    <add key="FeatureToggle" value="false" />
+    <add key="ApiEndpoint" value="http://client5.local/api" />
+    <add key="EnableCache" value="false" />
+    <add key="CacheDuration" value="60" />
+    <add key="RetryPolicy" value="ImmediateRetry" />
+  </appSettings>
+
+  <system.web>
+    <compilation debug="true" targetFramework="net6.0" />
+    <authentication mode="Windows" />
+    <customErrors mode="Off" />
+  </system.web>
+
+  <logging>
+    <logLevel default="Information">
+      <logger name="System" minLevel="Warning" />
+      <logger name="Application" minLevel="Debug" />
+    </logLevel>
+  </logging>
+</configuration>
+

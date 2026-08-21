@@ -1,0 +1,31 @@
+<configuration>
+  <connectionStrings>
+    <add name="MainDB" connectionString="Server=CLIENT6-SQL;Database=MainDB;User Id=user6;Password=pass6;" />
+    <add name="LoggingDB" connectionString="Server=CLIENT6-SQL;Database=Logs;User Id=loguser;Password=logpass;" />
+  </connectionStrings>
+
+  <appSettings>
+    <add key="FeatureToggle" value="true" />
+    <add key="ApiEndpoint" value="https://client6.local/api/v3" />
+    <add key="EnableCache" value="true" />
+    <add key="CacheDuration" value="180" />
+    <add key="RetryPolicy" value="LinearRetry" />
+    <add key="ExperimentalMode" value="enabled" />
+  </appSettings>
+
+  <system.web>
+    <compilation debug="false" targetFramework="net7.0" />
+    <authentication mode="Forms">
+      <forms loginUrl="~/Auth/Login.aspx" timeout="45" />
+    </authentication>
+    <customErrors mode="RemoteOnly" defaultRedirect="~/ErrorPage.aspx" />
+  </system.web>
+
+  <logging>
+    <logLevel default="Error">
+      <logger name="System" minLevel="Critical" />
+      <logger name="Application" minLevel="Error" />
+      <logger name="Security" minLevel="Warning" />
+    </logLevel>
+  </logging>
+</configuration>
