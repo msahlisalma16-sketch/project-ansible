@@ -1,13 +1,9 @@
 pipeline {
     agent any
-
+    
     options {
-        // valid options only
-        skipDefaultCheckout() // prevents automatic SCM checkout
-        buildDiscarder(logRotator(numToKeepStr: '10', daysToKeepStr: '7')) // auto delete old builds
+        skipDefaultCheckout()
     }
-   
-
 
     parameters {
         string(name: 'INVENTORY', defaultValue: 'inventory.ini', description: 'Ansible inventory file')
