@@ -1,28 +1,54 @@
-<configuration>
-  <connectionStrings>
-    <add name="MainDB" connectionString="Server=CLIENT5-SQL;Database=MainDB;User Id=user5;Password=pass5;" />
-    <add name="AnalyticsDB" connectionString="Server=CLIENT5-SQL;Database=Analytics;User Id=ana5;Password=ana5pass;" />
-  </connectionStrings>
+<Configuration>
 
-  <appSettings>
-    <add key="FeatureToggle" value="false" />
-    <add key="ApiEndpoint" value="http://client5.local/api" />
-    <add key="EnableCache" value="false" />
-    <add key="CacheDuration" value="60" />
-    <add key="RetryPolicy" value="ImmediateRetry" />
-  </appSettings>
+    <!-- Storage -->
+    <component name="StorageSystem">
+        <parameters>
+            <localPath>/data/client8</localPath>
+            <ftpHost>ftp.client8.local</ftpHost>
+            <ftpPort>22</ftpPort>
+            <ftpUser>ftpuser8</ftpUser>
+            <ftpPassword>ftppass8</ftpPassword>
+        </parameters>
+    </component>
 
-  <system.web>
-    <compilation debug="true" targetFramework="net6.0" />
-    <authentication mode="Windows" />
-    <customErrors mode="Off" />
-  </system.web>
+    <!-- API -->
+    <component name="ServiceGateway">
+        <parameters>
+            <endpointUrl>https://client8.local/api</endpointUrl>
+            <authToken>token_client8</authToken>
+            <timeout>90</timeout>
+        </parameters>
+    </component>
 
-  <logging>
-    <logLevel default="Information">
-      <logger name="System" minLevel="Warning" />
-      <logger name="Application" minLevel="Debug" />
-    </logLevel>
-  </logging>
-</configuration>
+    <!-- Databases -->
+    <component name="Modules">
+        <parameters>
+            <Database name="hrMain" user="hr_user8" password="hr_pass8" dsn="HRDSN8"/>
+            <Database name="finMain" user="fin_user8" password="fin_pass8" dsn="FINDSN8"/>
+        </parameters>
+    </component>
 
+    <!-- Messaging -->
+    <component name="MessagingSystem">
+        <parameters>
+            <serverHost>msg.client8.local</serverHost>
+            <serverPort>5673</serverPort>
+            <adminUser>msgadmin8</adminUser>
+            <adminPassword>msgpass8</adminPassword>
+            <hrQueue>hr_queue8</hrQueue>
+            <financeQueue>fin_queue8</financeQueue>
+            <auditTopic>audit_topic8</auditTopic>
+        </parameters>
+    </component>
+
+    <!-- Logging -->
+    <component name="Logger">
+        <parameters>
+            <logLevel>DEBUG</logLevel>
+            <logFormat>%d %p %c - %m%n</logFormat>
+            <logFile>/var/log/client8/app.log</logFile>
+            <logArchive>/var/log/client8/archive</logArchive>
+        </parameters>
+    </component>
+
+</Configuration>
