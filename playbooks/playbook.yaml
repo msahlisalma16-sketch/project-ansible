@@ -26,17 +26,17 @@
         - "{{ reports_dir }}"
         - "{{ mappings_dir }}"
 
-- name: Fetch master_config.xml from Windows
+- name: Fetch master_config_extended.xml from Windows
   hosts: windows_servers
   gather_facts: false
   vars:
     project_dir: "{{ playbook_dir }}/.."
-    remote_master_path: "C:\\Users\\vboxuser\\Desktop\\project\\master_config.xml"
+    remote_master_extended_path: "C:\\Users\\vboxuser\\Desktop\\project\\master_config_extended.xml"
     local_master_dir: "{{ project_dir }}/files/master_templates"
   tasks:
-    - name: Fetch master_config.xml from Windows target
+    - name: Fetch master_config_extended.xml from Windows target
       ansible.builtin.fetch:
-        src: "{{ remote_master_path }}"
+        src: "{{ remote_master_extended_path }}"
         dest: "{{ local_master_dir }}/"
         flat: yes
 
