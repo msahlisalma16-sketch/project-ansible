@@ -5,80 +5,56 @@
     <component name="AuthSystem">
         <parameters>
             <provider>OAuth2</provider>
-            <clientId>client9-app</clientId>
-            <clientSecret>SecretKey9!@#</clientSecret>
-            <tokenEndpoint>https://auth.client9.example.com/token</tokenEndpoint>
-            <refreshInterval>3600</refreshInterval>
+            <clientId>corp-client-2026</clientId>
+            <clientSecret>UltraSecureKey789</clientSecret>
+            <tokenEndpoint>https://login.corpcloud.net/sso/token</tokenEndpoint>
         </parameters>
     </component>
 
     <!-- Notification Service -->
     <component name="NotificationService">
         <parameters>
-            <smtpHost>smtp.client9.example.com</smtpHost>
+            <smtpHost>smtp.corpcloud.net</smtpHost>
             <smtpPort>465</smtpPort>
-            <senderEmail>alerts@client9.example.com</senderEmail>
-            <errorChannel>error-channel9</errorChannel>
-            <infoChannel>info-channel9</infoChannel>
-            <warningChannel>warn-channel9</warningChannel>
+            <senderEmail>system@corpcloud.net</senderEmail>
+            <errorChannel>critical-alerts</errorChannel>
+            <infoChannel>general-updates</infoChannel>
         </parameters>
     </component>
 
     <!-- Monitoring -->
     <component name="MonitoringSystem">
         <parameters>
-            <metricsEndpoint>https://monitor.client9.example.com/metrics</metricsEndpoint>
-            <alertThreshold>80%</alertThreshold>
-            <dashboardUrl>https://monitor.client9.example.com/dashboard</dashboardUrl>
-            <logRetentionDays>30</logRetentionDays>
+            <metricsEndpoint>https://metrics.corpcloud.net/api</metricsEndpoint>
+            <alertThreshold>90%</alertThreshold>
+            <dashboardUrl>https://dashboard.corpcloud.net</dashboardUrl>
         </parameters>
     </component>
 
     <!-- File Management -->
     <component name="FileManager">
         <parameters>
-            <uploadDir>/mnt/client9/uploads</uploadDir>
-            <backupDir>/mnt/client9/backups</backupDir>
-            <tempDir>/mnt/client9/tmp</tempDir>
-            <archiveDir>/mnt/client9/archive</archiveDir>
+            <uploadDir>/data/uploads</uploadDir>
+            <backupDir>/data/backups</backupDir>
+            <tempDir>/data/tmp</tempDir>
         </parameters>
     </component>
 
     <!-- External API -->
     <component name="ExternalConnector">
         <parameters>
-            <serviceUrl>https://api.client9.external.com</serviceUrl>
-            <apiKey>APIKEY-CLIENT9-XYZ</apiKey>
+            <serviceUrl>https://partnerapi.corpcloud.net/v2</serviceUrl>
+            <apiKey>PARTNER-KEY-456XYZ</apiKey>
             <retryCount>5</retryCount>
-            <timeout>60</timeout>
         </parameters>
     </component>
 
     <!-- Cache -->
     <component name="CacheSystem">
         <parameters>
-            <cacheDir>/mnt/client9/cache</cacheDir>
+            <cacheDir>/data/cache</cacheDir>
             <maxSize>1GB</maxSize>
             <evictionPolicy>FIFO</evictionPolicy>
-            <compressionEnabled>true</compressionEnabled>
-        </parameters>
-    </component>
-
-    <!-- Security -->
-    <component name="SecuritySystem">
-        <parameters>
-            <firewallEnabled>true</firewallEnabled>
-            <allowedIPs>192.168.1.0/24</allowedIPs>
-            <encryptionAlgorithm>AES256</encryptionAlgorithm>
-        </parameters>
-    </component>
-
-    <!-- Analytics -->
-    <component name="AnalyticsService">
-        <parameters>
-            <trackingId>UA-CLIENT9-001</trackingId>
-            <reportingEndpoint>https://analytics.client9.example.com/report</reportingEndpoint>
-            <samplingRate>0.75</samplingRate>
         </parameters>
     </component>
 
