@@ -34,12 +34,12 @@
     remote_master_extended_path: "C:\\Users\\vboxuser\\Desktop\\project\\master_config_extended.xml"
     local_master_dir: "{{ project_dir }}/files/master_templates"
   tasks:
-    - name: Fetch master_config_extended.xml from Windows target
-      ansible.builtin.fetch:
-        src: "{{ remote_master_extended_path }}"
-        dest: "{{ local_master_dir }}/"
-        flat: yes
-
+   - name: Fetch master_config_extended.xml from Windows target
+     ansible.builtin.fetch:
+       src: "C:\\Users\\vboxuser\\Desktop\\project\\master_config_extended.xml"
+       dest: "{{ project_dir }}/files/master_templates/master_config_extended.xml"
+       flat: yes
+ 
 
 - name: Generate XML migration artifacts
   hosts: localhost
