@@ -39,7 +39,7 @@
        src: "C:\\Users\\vboxuser\\Desktop\\project\\master_config_extended.xml"
        dest: "{{ project_dir }}/files/master_templates/master_config_extended.xml"
        flat: yes
- 
+
 
 - name: Generate XML migration artifacts
   hosts: localhost
@@ -75,6 +75,8 @@
         argv:
           - "{{ python_executable }}"
           - "{{ project_dir }}/tests/score_probe.py"
+      args:
+        chdir: "{{ project_dir }}"
       register: score_probe_out
       environment:
         PYTHONPATH: "{{ project_dir }}"
@@ -91,6 +93,8 @@
           - -m
           - unittest
           - tests.test_xml_migration
+      args:
+        chdir: "{{ project_dir }}"
       register: test_xml_out
       environment:
         PYTHONPATH: "{{ project_dir }}"
@@ -105,6 +109,8 @@
         argv:
           - "{{ python_executable }}"
           - "{{ project_dir }}/utils/debug_match.py"
+      args:
+        chdir: "{{ project_dir }}"
       register: debug_match_out
       environment:
         PYTHONPATH: "{{ project_dir }}"
@@ -119,6 +125,8 @@
         argv:
           - "{{ python_executable }}"
           - "{{ project_dir }}/utils/debug_parser.py"
+      args:
+        chdir: "{{ project_dir }}"
       register: debug_parser_out
       environment:
         PYTHONPATH: "{{ project_dir }}"
