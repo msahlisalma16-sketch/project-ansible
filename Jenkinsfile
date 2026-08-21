@@ -2,12 +2,11 @@ pipeline {
     agent any
 
     options {
-        cleanWs()                        // wipes workspace before each run
         skipDefaultCheckout()            // prevents automatic SCM checkout
         buildDiscarder(
             logRotator(
-                numToKeepStr: '1',      // keep only last 10 builds
-
+                numToKeepStr: '10',      // keep only last 10 builds
+                daysToKeepStr: '7'       // or builds from last 7 days
             )
         )
     }
@@ -95,6 +94,7 @@ pipeline {
         always {
             sh 'rm -f "$VAULT_PASSWORD_FILE"'
             archiveArtifacts artifacts: 'reports/**', fingerprint: true
+            cleanWs()   // ✅ clean workspace after every run
         }
     }
 }
