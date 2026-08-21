@@ -1,6 +1,8 @@
 pipeline {
     agent any
-    
+    environment {
+        ANSIBLE_CMD = "${params.ANSIBLE_CMD}"
+    }
     options {
         skipDefaultCheckout()
     }
