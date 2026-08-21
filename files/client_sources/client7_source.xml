@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<enterpriseConfiguration>
+
+    <!-- Authentication -->
+    <component name="AuthSystem">
+        <parameters>
+            <provider>OAuth2</provider>
+            <clientId>corp-client-2026</clientId>
+            <clientSecret>UltraSecureKey789</clientSecret>
+            <tokenEndpoint>https://login.corpcloud.net/sso/token</tokenEndpoint>
+        </parameters>
+    </component>
+
+    <!-- Notification Service -->
+    <component name="NotificationService">
+        <parameters>
+            <smtpHost>smtp.corpcloud.net</smtpHost>
+            <smtpPort>465</smtpPort>
+            <senderEmail>system@corpcloud.net</senderEmail>
+            <errorChannel>critical-alerts</errorChannel>
+            <infoChannel>general-updates</infoChannel>
+        </parameters>
+    </component>
+
+    <!-- Monitoring -->
+    <component name="MonitoringSystem">
+        <parameters>
+            <metricsEndpoint>https://metrics.corpcloud.net/api</metricsEndpoint>
+            <alertThreshold>90%</alertThreshold>
+            <dashboardUrl>https://dashboard.corpcloud.net</dashboardUrl>
+        </parameters>
+    </component>
+
+    <!-- File Management -->
+    <component name="FileManager">
+        <parameters>
+            <uploadDir>/data/uploads</uploadDir>
+            <backupDir>/data/backups</backupDir>
+            <tempDir>/data/tmp</tempDir>
+        </parameters>
+    </component>
+
+    <!-- External API -->
+    <component name="ExternalConnector">
+        <parameters>
+            <serviceUrl>https://partnerapi.corpcloud.net/v2</serviceUrl>
+            <apiKey>PARTNER-KEY-456XYZ</apiKey>
+            <retryCount>5</retryCount>
+        </parameters>
+    </component>
+
+    <!-- Cache -->
+    <component name="CacheSystem">
+        <parameters>
+            <cacheDir>/data/cache</cacheDir>
+            <maxSize>1GB</maxSize>
+            <evictionPolicy>FIFO</evictionPolicy>
+        </parameters>
+    </component>
+
+</enterpriseConfiguration>
