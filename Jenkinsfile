@@ -2,14 +2,12 @@ pipeline {
     agent any
 
     options {
-        skipDefaultCheckout()            // prevents automatic SCM checkout
-        buildDiscarder(
-            logRotator(
-                numToKeepStr: '10',      // keep only last 10 builds
-                daysToKeepStr: '7'       // or builds from last 7 days
-            )
-        )
+        // valid options only
+        skipDefaultCheckout() // prevents automatic SCM checkout
+        buildDiscarder(logRotator(numToKeepStr: '10', daysToKeepStr: '7')) // auto delete old builds
     }
+   
+
 
     parameters {
         string(name: 'INVENTORY', defaultValue: 'inventory.ini', description: 'Ansible inventory file')
@@ -94,7 +92,6 @@ pipeline {
         always {
             sh 'rm -f "$VAULT_PASSWORD_FILE"'
             archiveArtifacts artifacts: 'reports/**', fingerprint: true
-            cleanWs()   // ✅ clean workspace after every run
         }
     }
 }
