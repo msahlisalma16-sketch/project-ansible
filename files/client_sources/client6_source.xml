@@ -3,65 +3,74 @@
 
     <!-- Authentication -->
     <Authentication>
-        <Provider type="SAML2"/>
+        <Provider type="OIDC"/>
         <Client>
-            <Id>corp-client-2026</Id>
-            <Secret>UltraSecureKey789</Secret>
+            <Id>corp-client-999</Id>
+            <Secret>SecureKey!2026</Secret>
         </Client>
         <Token>
-            <Endpoint>https://login.corpcloud.net/sso/token</Endpoint>
+            <Endpoint>https://auth.globalcorp.net/oauth/token</Endpoint>
         </Token>
     </Authentication>
 
     <!-- Notification Service -->
     <Notifications>
         <SMTP>
-            <Host>smtp.corpcloud.net</Host>
-            <Port>465</Port>
+            <Host>smtp.globalcorp.net</Host>
+            <Port>2525</Port>
+            <TLS>true</TLS>
         </SMTP>
         <Sender>
-            <Email>system@corpcloud.net</Email>
+            <Email>alerts@globalcorp.net</Email>
+            <Name>GlobalCorp Alerts</Name>
         </Sender>
         <Channels>
-            <ErrorQueue>critical-alerts</ErrorQueue>
-            <InfoQueue>general-updates</InfoQueue>
+            <ErrorQueue>system-errors</ErrorQueue>
+            <InfoQueue>system-info</InfoQueue>
+            <WarningQueue>system-warnings</WarningQueue>
         </Channels>
     </Notifications>
 
     <!-- Monitoring -->
     <Monitoring>
         <Metrics>
-            <Url>https://metrics.corpcloud.net/api</Url>
+            <Url>https://metrics.globalcorp.net/v1</Url>
+            <Interval>30s</Interval>
         </Metrics>
         <Alert>
-            <Threshold>90%</Threshold>
+            <Threshold>75%</Threshold>
+            <Email>ops-team@globalcorp.net</Email>
         </Alert>
         <Dashboard>
-            <Url>https://dashboard.corpcloud.net</Url>
+            <Url>https://dashboard.globalcorp.net</Url>
+            <Theme>dark</Theme>
         </Dashboard>
     </Monitoring>
 
     <!-- File Management -->
     <FileSystem>
-        <UploadDir>/data/uploads</UploadDir>
-        <BackupDir>/data/backups</BackupDir>
-        <TempDir>/data/tmp</TempDir>
+        <UploadDir>/srv/global/uploads</UploadDir>
+        <BackupDir>/srv/global/backups</BackupDir>
+        <TempDir>/srv/global/tmp</TempDir>
+        <LogsDir>/srv/global/logs</LogsDir>
     </FileSystem>
 
     <!-- External API -->
     <ExternalAPI>
         <Service>
-            <Url>https://partnerapi.corpcloud.net/v2</Url>
-            <ApiKey>PARTNER-KEY-456XYZ</ApiKey>
-            <Retry>5</Retry>
+            <Url>https://partnerapi.globalcorp.net/v3</Url>
+            <ApiKey>PARTNER-KEY-2026-XYZ</ApiKey>
+            <Retry>4</Retry>
+            <Timeout>10000</Timeout>
         </Service>
     </ExternalAPI>
 
     <!-- Cache -->
     <Cache>
-        <Directory>/data/cache</Directory>
-        <MaxSize>1GB</MaxSize>
-        <EvictionPolicy>FIFO</EvictionPolicy>
+        <Directory>/srv/global/cache</Directory>
+        <MaxSize>2GB</MaxSize>
+        <EvictionPolicy>LFU</EvictionPolicy>
+        <Compression>true</Compression>
     </Cache>
 
 </enterpriseConfig>
