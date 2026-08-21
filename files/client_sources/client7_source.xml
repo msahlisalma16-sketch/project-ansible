@@ -1,54 +1,48 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<enterpriseConfiguration>
-    <!-- Authentication -->
-    <component name="AuthSystem">
+<Configuration>
+
+    <!-- Storage -->
+    <component name="StorageSystem">
         <parameters>
-            <provider>okta</provider>
-            <clientId>ent-app-8f3a2b1c</clientId>
-            <clientSecret>a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6</clientSecret>
-            <tokenEndpoint>https://auth.example.com/oauth2/token</tokenEndpoint>
+            <localPath>/data/client9</localPath>
+            <ftpHost>ftp.client9.local</ftpHost>
+            <ftpUser>ftpuser9</ftpUser>
+            <ftpPassword>ftppass9</ftpPassword>
         </parameters>
     </component>
-    <!-- Notification Service -->
-    <component name="NotificationService">
+
+    <!-- API -->
+    <component name="ServiceGateway">
         <parameters>
-            <smtpHost>smtp.example.com</smtpHost>
-            <smtpPort>587</smtpPort>
-            <senderEmail>noreply@example.com</senderEmail>
-            <errorChannel>#alerts-errors</errorChannel>
-            <infoChannel>#alerts-info</infoChannel>
+            <endpointUrl>https://client9.local/api</endpointUrl>
+            <authToken>token_client9</authToken>
+            <timeout>120</timeout>
         </parameters>
     </component>
-    <!-- Monitoring -->
-    <component name="MonitoringSystem">
+
+    <!-- Databases -->
+    <component name="Modules">
         <parameters>
-            <metricsEndpoint>https://metrics.example.com/api/v1/ingest</metricsEndpoint>
-            <alertThreshold>85</alertThreshold>
-            <dashboardUrl>https://dashboard.example.com/monitoring</dashboardUrl>
+            <Database name="finMain" user="fin_user9" password="fin_pass9" dsn="FINDSN9"/>
         </parameters>
     </component>
-    <!-- File Management -->
-    <component name="FileManager">
+
+    <!-- Messaging -->
+    <component name="MessagingSystem">
         <parameters>
-            <uploadDir>/data/uploads</uploadDir>
-            <backupDir>/data/backups</backupDir>
-            <tempDir>/data/tmp</tempDir>
+            <serverHost>msg.client9.local</serverHost>
+            <serverPort>5674</serverPort>
+        
         </parameters>
     </component>
-    <!-- External API -->
-    <component name="ExternalConnector">
+
+    <!-- Logging -->
+    <component name="Logger">
         <parameters>
-            <serviceUrl>https://api.partner-service.com/v2</serviceUrl>
-            <apiKey>sk_live_9f8e7d6c5b4a3210</apiKey>
-            <retryCount>3</retryCount>
+            <logLevel>INFO</logLevel>
+            <logFormat>%d [%t] %-5p %c - %m%n</logFormat>
+            <logFile>/var/log/client9/app.log</logFile>
+            <logArchive>/var/log/client9/archive</logArchive>
         </parameters>
     </component>
-    <!-- Cache -->
-    <component name="CacheSystem">
-        <parameters>
-            <cacheDir>/var/cache/app</cacheDir>
-            <maxSize>512MB</maxSize>
-            <evictionPolicy>LRU</evictionPolicy>
-        </parameters>
-    </component>
-</enterpriseConfiguration>
+
+</Configuration>
